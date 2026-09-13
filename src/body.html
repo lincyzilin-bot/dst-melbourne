@@ -23,18 +23,19 @@
     <button class="abtn" id="btn-eat">🍖<br>EAT (Q)</button>
     <button class="abtn" id="btn-fire">🔥<br>FIRE (C)</button>
     <button class="abtn" id="btn-bridge">🌉<br>BRIDGE (B)</button>
+    <button class="abtn" id="btn-boat">🚣<br>BOAT (V)</button>
   </div>
   <div id="prompt"></div><div id="toast"></div><div id="saved-tag">✓ exploration saved</div>
 </div>
 <div id="start-overlay" class="overlay">
   <div class="card">
     <h1>🌙 DON'T STARVE: <span>MELBOURNE</span></h1>
-    <p>Three.js survival clone — <b>central CBD</b> ringed by a <b>wide moat</b> (cross at 4 dirt fords — boat coming next), outer ring fills the map: <b>NW grassland</b>, <b>NE farm</b> (<b>Day 5</b>), <b>SW wetland</b> (<b>Day 4</b>), <b>SE ruins</b> (<b>Day 7</b>). Small rivers block quadrant borders — cross at plank bridges or build your own (🌉 4 log + 2 stone, <kbd>B</kbd>).</p>
+    <p>Three.js survival clone — <b>central CBD</b> ringed by a <b>wide moat</b> (cross at dirt fords or paddle a <b>🚣 rowboat</b> — 5 log + 2 stone, <kbd>V</kbd> to board), outer ring fills the map: <b>NW grassland</b>, <b>NE farm</b> (<b>Day 5</b>), <b>SW wetland</b> (<b>Day 4</b>), <b>SE ruins</b> (<b>Day 7</b>). Small rivers block quadrant borders — cross at plank bridges or build your own (🌉 4 log + 2 stone, <kbd>B</kbd>).</p>
     <div class="zone-legend"><span style="background:#3c3f45;color:#ffe9b0">🏙️ CBD</span><span style="background:#6d7a35;color:#fff">🌾 GRASSLAND</span><span style="background:#1f6f6b;color:#fff">💧 WETLAND 🔒D4</span><span style="background:#6e5136;color:#fff">🚜 FARM 🔒D5</span><span style="background:#8d9299;color:#fff">🏚️ RUINS 🔒D7</span></div>
     <div class="bigpct" id="start-pct">0.0%</div>
     <p>of the map explored — <b>saved across every play</b> (localStorage)</p>
     <div class="runs" id="runs-list"></div>
-    <div class="keys"><kbd>WASD</kbd>/<kbd>arrows</kbd> walk · <kbd>E</kbd> chop/mine/pick/gift · <kbd>Space</kbd> attack · <kbd>Q</kbd> eat · <kbd>C</kbd> campfire · <kbd>B</kbd> lay bridge · click = walk there<br>🌾 Wheat needs <b>⛏️ pickaxe</b>. 🐇 Day rabbits → morsel. 🦡 Park possums: <b>E</b> with food/flowers = friend, <b>Space</b> = enemy + meat. 🌊 Rivers block — use bridges. 🧠 Watch sanity at night.</div>
+    <div class="keys"><kbd>WASD</kbd>/<kbd>arrows</kbd> walk · <kbd>E</kbd> chop/mine/pick/gift · <kbd>Space</kbd> attack · <kbd>Q</kbd> eat · <kbd>C</kbd> campfire · <kbd>B</kbd> lay bridge · <kbd>V</kbd> board boat · click = walk there<br>🌾 Wheat needs <b>⛏️ pickaxe</b>. 🐇 Day rabbits → morsel. 🦡 Park possums: <b>E</b> with food/flowers = friend, <b>Space</b> = enemy + meat. 🌊 Moat needs 🚣 boat, rivers need 🌉 bridges. 🧠 Watch sanity at night.</div>
     <div class="rowbtns"><button class="btn" id="btn-continue">▶ CONTINUE</button><button class="btn ghost" id="btn-new">🧭 NEW RUN</button></div>
     <div class="rowbtns"><button class="btn warn" id="btn-wipe" style="font-size:12px;padding:7px 14px">🗑 wipe exploration save</button></div>
   </div>
