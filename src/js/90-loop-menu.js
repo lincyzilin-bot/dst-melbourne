@@ -111,4 +111,6 @@ document.getElementById('btn-respawn').onclick=()=>{refreshStartPanel();startRun
 document.getElementById('btn-wipe').onclick=()=>{if(confirm('Wipe ALL exploration + history?')){save=freshSave();lifeBits=save.lifetime.split('').map(Number);runAdded=0;persist();redrawFog();refreshStartPanel();}};
 document.getElementById('history-btn').onclick=()=>{document.getElementById('history-list').innerHTML=save.runs.length?save.runs.map((r,i)=>`<div>#${save.totalRuns-i} · ${r.d} — Day ${r.day}, ${r.pct}% (+${r.added})</div>`).join(''):'<div>No runs yet.</div>';document.getElementById('history-overlay').classList.remove('hidden');};
 document.getElementById('btn-close-history').onclick=()=>document.getElementById('history-overlay').classList.add('hidden');
+document.getElementById('btn-how').onclick=()=>document.getElementById('how-overlay').classList.remove('hidden');
+document.getElementById('btn-close-how').onclick=()=>document.getElementById('how-overlay').classList.add('hidden');
 refreshStartPanel();renderInv();
