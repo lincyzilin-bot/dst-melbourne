@@ -26,7 +26,7 @@ function walkable(x,z){
   if(inFarm(x,z)&&farmLocked())return false;   // 🔒 locked until Day 5
   if(inRuin(x,z)&&ruinLocked())return false;   // 🔒 locked until Day 7
   if(isRiver(x,z)&&!onBridge(x,z))return false; // rivers need player-built bridges
-  if(isWater(x,z))return false; // moat + ponds block (bridges exempt rivers above)
+  if(isWater(x,z))return false; // moat + ponds block (bridge decks exempt in isWater)
   return true;
 }
 if(!walkable(P.x,P.z)){P.x=SPAWN.x;P.z=SPAWN.z;}

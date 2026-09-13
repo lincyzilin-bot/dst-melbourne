@@ -75,7 +75,7 @@ function isMoat(x,z){
   const inOuter=x>MOAT.x0&&x<MOAT.x1&&z>MOAT.z0&&z<MOAT.z1;
   return inOuter&&!isCBD(x,z);
 }
-function isWater(x,z){return isPond(x,z)||isMoat(x,z)||(isRiver(x,z)&&!onBridge(x,z));}
+function isWater(x,z){return (isPond(x,z)||isMoat(x,z)||isRiver(x,z))&&!onBridge(x,z);}
 function wetlandLocked(){return P.day<=3;} // 💧 unlocks Day 4
 function farmLocked(){return P.day<=4;}     // 🚜 unlocks Day 5 (survived 4 days)
 function ruinLocked(){return P.day<=6;}     // 🏚️ unlocks Day 7 (survived 6 days)

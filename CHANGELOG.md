@@ -1,3 +1,6 @@
+## v1.5.3 - 20260913-2245
+- bridge decks walkable over moat water, not just rivers
+
 ## v1.5.2 - 20260913-2230
 - bridges auto-orient perpendicular via nearest water segment
 
