@@ -24,6 +24,8 @@ function walkable(x,z){
   if(isWater(x,z))return false;
   if(hitsSolid(x,z))return false;
   if(isWet(x,z)&&wetlandLocked())return false; // 🔒 locked until Day 4
+  if(inFarm(x,z)&&farmLocked())return false;   // 🔒 locked until Day 5
+  if(inRuin(x,z)&&ruinLocked())return false;   // 🔒 locked until Day 7
   return true;
 }
 if(!walkable(P.x,P.z)){P.x=SPAWN.x;P.z=SPAWN.z;}

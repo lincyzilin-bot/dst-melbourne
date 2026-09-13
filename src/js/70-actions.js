@@ -15,7 +15,7 @@ function doAct(){
   if(pm){actCd=0.32;giftToPossum(pm);return;}
   const rb=nearestRabbit(2.6);
   if(rb){actCd=0.3;toast('🐇 Too quick — hit it with Space!');return;}
-  const o=nearestInteract();if(!o){toast('Nothing in reach — try parks, grassland wheat, wetland bushes');return;}
+  const o=nearestInteract();if(!o){toast('Nothing in reach — try CBD parks, NW grassland, unlocked zones');return;}
   actCd=0.3;const hasAxe=inv.axe>0,hasPick=inv.pick>0;
   if(o.kind==='tree'){o.hp-=hasAxe?2:1;toast(hasAxe?'🪓 Chop!':'✊ Shaking the tree... craft an axe!');if(o.hp<=0){inv.log+=2;toast('🪵 +2 logs');regrow(o);}}
   else if(o.kind==='rock'){o.hp-=hasPick?2:1;toast(hasPick?'⛏️ Clang!':'✊ Kick the rubble... craft a pickaxe!');if(o.hp<=0){inv.stone+=2;toast('🪨 +2 stone');regrow(o);}}

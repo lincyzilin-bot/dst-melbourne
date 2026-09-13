@@ -6,8 +6,8 @@ function addEntity(o){o.mesh.position.set(o.x,0,o.z);world.add(o.mesh);interacta
 function randIn(rect){for(let t=0;t<60;t++){const x=rect.x0+2+Math.random()*(rect.x1-rect.x0-4),z=rect.z0+2+Math.random()*(rect.z1-rect.z0-4);if(!walkable(x,z)||isRoad(x,z))continue;if(Math.hypot(x-P.x,z-P.z)<3)continue;return{x,z};}return{x:SPAWN.x+3,z:SPAWN.z};}
 function randCBD(){return randIn(CBD);}function randGrass(){for(let t=0;t<60;t++){const x=GRASS.x0+2+Math.random()*(GRASS.x1-GRASS.x0-4),z=GRASS.z0+2+Math.random()*(GRASS.z1-GRASS.z0-4);if(isWater(x,z)||hitsSolid(x,z,0.6))continue;return{x,z};}return{x:-50,z:-50};}
 function randWet(){for(let t=0;t<60;t++){const x=WET.x0+2+Math.random()*(WET.x1-WET.x0-4),z=WET.z0+2+Math.random()*(WET.z1-WET.z0-4);if(isWater(x,z)||hitsSolid(x,z,0.6))continue;return{x,z};}return{x:-50,z:40};}
-function randFarm(){for(let t=0;t<40;t++){const x=FARM.x0+1.5+Math.random()*(FARM.x1-FARM.x0-3),z=FARM.z0+1.5+Math.random()*(FARM.z1-FARM.z0-3);if(hitsSolid(x,z,0.8))continue;return{x,z};}return{x:85,z:0};}
-function randRuin(){const R=Math.random()<.5?RUIN_N:RUIN_S;for(let t=0;t<40;t++){const x=R.x0+2+Math.random()*(R.x1-R.x0-4),z=R.z0+2+Math.random()*(R.z1-R.z0-4);if(hitsSolid(x,z,0.9))continue;return{x,z};}return{x:30,z:-60};}
+function randFarm(){for(let t=0;t<40;t++){const x=FARM.x0+1.5+Math.random()*(FARM.x1-FARM.x0-3),z=FARM.z0+1.5+Math.random()*(FARM.z1-FARM.z0-3);if(hitsSolid(x,z,0.8))continue;return{x,z};}return{x:65,z:-66};}
+function randRuin(){for(let t=0;t<40;t++){const x=RUIN.x0+2+Math.random()*(RUIN.x1-RUIN.x0-4),z=RUIN.z0+2+Math.random()*(RUIN.z1-RUIN.z0-4);if(hitsSolid(x,z,0.9))continue;return{x,z};}return{x:65,z:66};}
 const trunkM=new THREE.MeshStandardMaterial({color:0x6b4423,roughness:.9});
 const leafM=new THREE.MeshStandardMaterial({color:0x2f7d32,roughness:.8});
 function makeTree(x,z){const g=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.26,1.8,8),trunkM);tr.position.y=0.9;tr.castShadow=true;g.add(tr);const c=new THREE.Mesh(new THREE.SphereGeometry(0.95,10,10),leafM);c.position.y=2.2;c.castShadow=true;g.add(c);return addEntity({kind:'tree',mesh:g,x,z,hp:3});}
@@ -97,5 +97,47 @@ function updatePossums(dt){
     if(tx!==null){const dx=tx-p.x,dz=tz-p.z,d=Math.hypot(dx,dz);if(d>0.2){const nx=p.x+dx/d*Math.min(sp*dt,d),nz=p.z+dz/d*Math.min(sp*dt,d);if(walkable(nx,nz)){p.x=nx;p.z=nz;}p.mesh.rotation.y=Math.atan2(dx,dz);}p.mesh.position.set(p.x,Math.abs(Math.sin(performance.now()*0.012))*0.12,p.z);}
   }
 }
-function spawnSpider(){const a=Math.random()*7,r=16+Math.random()*8;let x=Math.max(-95,Math.min(95,P.x+Math.cos(a)*r)),z=Math.max(-95,Math.min(95,P.z+Math.sin(a)*r));if(!walkable(x,z))return;const g=new THREE.Group();const b=new THREE.Mesh(new THREE.SphereGeometry(0.5,12,10),new THREE.MeshStandardMaterial({color:0x1a1a22}));b.position.y=0.55;b.castShadow=true;g.add(b);g.position.set(x,0,z);scene.add(g);mobs.push({mesh:g,x,z,hp:60,atkT:0});}
+function spawnSpider(){
+  const a=Math.random()*7,r=16+Math.random()*8;
+  let x=Math.max(-95,Math.min(95,P.x+Math.cos(a)*r)),z=Math.max(-95,Math.min(95,P.z+Math.sin(a)*r));
+  if(!walkable(x,z))return;
+  const g=new THREE.Group();
+  const hairM=new THREE.MeshStandardMaterial({color:0x1a1a22,roughness:.95});
+  const bellyM=new THREE.MeshStandardMaterial({color:0x2a2a38,roughness:.9});
+  // abdomen (rear, striped)
+  const abd=new THREE.Mesh(new THREE.SphereGeometry(0.5,14,12),bellyM);
+  abd.position.set(0,0.62,-0.35);abd.scale.set(1,0.85,1.3);abd.castShadow=true;g.add(abd);
+  const stripe=new THREE.Mesh(new THREE.SphereGeometry(0.3,10,8),new THREE.MeshStandardMaterial({color:0x5a2e2e,roughness:.9}));
+  stripe.position.set(0,0.85,-0.4);stripe.scale.set(0.6,0.35,1.0);g.add(stripe);
+  // cephalothorax (front)
+  const ceph=new THREE.Mesh(new THREE.SphereGeometry(0.32,14,12),hairM);
+  ceph.position.set(0,0.52,0.35);ceph.castShadow=true;g.add(ceph);
+  // eyes: 2 large + 6 small, glossy red
+  const eyeM=new THREE.MeshStandardMaterial({color:0xcc2222,roughness:.2,emissive:0x550000});
+  const eyeW=new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:.3});
+  for(const [ex,ey,ez,s,mat] of [[-0.11,0.62,0.62,0.07,eyeM],[0.11,0.62,0.62,0.07,eyeM],[-0.2,0.56,0.55,0.045,eyeW],[0.2,0.56,0.55,0.045,eyeW],[-0.06,0.68,0.58,0.04,eyeM],[0.06,0.68,0.58,0.04,eyeM],[-0.15,0.66,0.56,0.035,eyeM],[0.15,0.66,0.56,0.035,eyeM]]){
+    const e=new THREE.Mesh(new THREE.SphereGeometry(s,8,8),mat);e.position.set(ex,ey,ez);g.add(e);
+  }
+  // fangs
+  const fangM=new THREE.MeshStandardMaterial({color:0x111111,roughness:.6});
+  for(const sx of [-1,1]){const f=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.25,6),fangM);f.position.set(sx*0.12,0.32,0.55);f.rotation.x=Math.PI;g.add(f);}
+  // 8 jointed legs: hip pivot + upper + lower segments
+  const legM=new THREE.MeshStandardMaterial({color:0x14141c,roughness:.95});
+  const legs=[];
+  for(let side=-1;side<=1;side+=2){
+    for(let i=0;i<4;i++){
+      const hip=new THREE.Group();
+      const t=(i-1.5)*0.35; // spread front/back
+      hip.position.set(side*0.28,0.5,0.3-t*0.9);
+      hip.rotation.y=side*(0.5+Math.abs(i-1.5)*0.28)+(i-1.5)*0.25;
+      const upper=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.04,0.75,6),legM);
+      upper.position.set(side*0.3,0.28,0);upper.rotation.z=side*1.0;upper.castShadow=true;hip.add(upper);
+      const lower=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.02,0.85,6),legM);
+      lower.position.set(side*0.62,-0.1,0);lower.rotation.z=side*0.35;lower.castShadow=true;hip.add(lower);
+      g.add(hip);legs.push({hip,off:Math.random()*7,side});
+    }
+  }
+  g.position.set(x,0,z);scene.add(g);
+  mobs.push({mesh:g,x,z,hp:60,atkT:0,legs,phase:Math.random()*7});
+}
 function placeFire(x,z,fuel=120){const g=new THREE.Group();for(let i=0;i<4;i++){const l=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,1.1,7),trunkM);l.rotation.z=Math.PI/2;l.rotation.y=i*0.8;l.position.y=0.25;g.add(l);}const flame=new THREE.Mesh(new THREE.ConeGeometry(0.4,1.1,10),new THREE.MeshBasicMaterial({color:0xff9a2e,transparent:true,opacity:.95}));flame.position.y=1.0;g.add(flame);const light=new THREE.PointLight(0xff9a3c,30,24,1.7);light.position.y=1.6;g.add(light);g.position.set(x,0,z);scene.add(g);fires.push({mesh:g,x,z,fuel,flame,light});}

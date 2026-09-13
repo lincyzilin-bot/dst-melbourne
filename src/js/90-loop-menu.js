@@ -10,10 +10,14 @@ function movePlayer(dt){
     if(L>1){ix/=L;iz/=L;}
     if(keys.KeyW||keys.KeyA||keys.KeyS||keys.KeyD||keys.ArrowUp||keys.ArrowDown||keys.ArrowLeft||keys.ArrowRight)clickTarget=null;
     const nx=P.x+ix*P.speed*dt,nz=P.z+iz*P.speed*dt;
-    // wetland gate: block entry + message while locked
-    if(isWet(nx,nz)&&wetlandLocked()){lockToastCd-=dt;if(lockToastCd<=0){lockToastCd=3;toast('🔒 Wetland locked — survive past Day 3 (reach Day 4)!');}}
+    // zone gates: block entry + message while locked
+    function gateMsg(test,msg){if(test(nx,nz)){lockToastCd-=dt;if(lockToastCd<=0){lockToastCd=3;toast(msg);}return true;}return false;}
+    let blockedX=false;
+    if(gateMsg((x,z)=>isWet(x,z)&&wetlandLocked(),'🔒 Wetland locked — survive past Day 3 (reach Day 4)!'))blockedX=true;
+    else if(gateMsg((x,z)=>inFarm(x,z)&&farmLocked(),'🔒 Farm locked — survive 4 days (reach Day 5)!'))blockedX=true;
+    else if(gateMsg((x,z)=>inRuin(x,z)&&ruinLocked(),'🔒 Ruins locked — survive 6 days (reach Day 7)!'))blockedX=true;
     else if(walkable(nx,P.z))P.x=nx;
-    if(isWet(P.x,nz)&&wetlandLocked()){/* blocked on z too */}
+    if((isWet(P.x,nz)&&wetlandLocked())||(inFarm(P.x,nz)&&farmLocked())||(inRuin(P.x,nz)&&ruinLocked())){/* blocked on z too */}
     else if(walkable(P.x,nz))P.z=nz;
     P.face=Math.atan2(ix,iz);P.walkPhase+=dt*12;
   }
@@ -32,13 +36,30 @@ function updateSky(){
   sun.position.set(P.x+20,ph==='night'?8:32,P.z+12);sun.target.position.set(P.x,0,P.z);
   playerLight.position.set(P.x,3,P.z);playerLight.intensity=ph==='night'?(nearFire()?0:7):0;playerLight.color.set(0x8fa8ff);
   lockWall.visible=wetlandLocked();
+  if(typeof farmWall!=='undefined')farmWall.visible=farmLocked();
+  if(typeof ruinWall!=='undefined')ruinWall.visible=ruinLocked();
   document.getElementById('clockfill').style.width=(P.dayT*100)+'%';
   document.getElementById('phase-icon').textContent=PHASE_ICO[ph];
   document.getElementById('day-label').textContent='Day '+P.day;
   document.getElementById('zone-label').textContent=ZONE_ICON[zoneOf(P.x,P.z)]+(isWet(P.x,P.z)?'':'') ;
   const lt=document.getElementById('lock-tag');
-  if(wetlandLocked()){lt.textContent=`🔒 WETLAND unlocks Day 4 (now Day ${P.day})`;lt.className='';lt.id='lock-tag';}
-  else{lt.textContent='💧 WETLAND OPEN — explore!';lt.className='open';lt.id='lock-tag';}
+  if(lt){
+    if(wetlandLocked()){lt.textContent=`🔒 WETLAND unlocks Day 4 (now Day ${P.day})`;lt.className='';}
+    else{lt.textContent='💧 WETLAND OPEN — explore!';lt.className='open';}
+    lt.id='lock-tag';
+  }
+  const lf=document.getElementById('lock-tag-farm');
+  if(lf){
+    if(farmLocked()){lf.textContent=`🔒 FARM unlocks Day 5 (now Day ${P.day})`;lf.className='';}
+    else{lf.textContent='🚜 FARM OPEN — explore!';lf.className='open';}
+    lf.id='lock-tag-farm';
+  }
+  const lr=document.getElementById('lock-tag-ruin');
+  if(lr){
+    if(ruinLocked()){lr.textContent=`🔒 RUINS unlock Day 7 (now Day ${P.day})`;lr.className='';}
+    else{lr.textContent='🏚️ RUINS OPEN — explore!';lr.className='open';}
+    lr.id='lock-tag-ruin';
+  }
 }
 const mm=document.getElementById('minimap').getContext('2d');
 const thumb=document.createElement('canvas');thumb.width=thumb.height=N;
@@ -80,7 +101,7 @@ function startRun(fresh){
   runAdded=0;persist(false);
   document.getElementById('start-overlay').classList.add('hidden');document.getElementById('dead-overlay').classList.add('hidden');
   document.getElementById('hud').classList.add('on');playing=true;P.dead=false;renderInv();drawMinimap();updateExploreUI();
-  toast(fresh?'🧭 New run! CBD → NW grassland. Wetland opens Day 4.':'🧭 Welcome back. Map saved.');
+  toast(fresh?'🧭 New run! CBD → NW grassland. Wet D4 · Farm D5 · Ruins D7.':'🧭 Welcome back. Map saved.');
 }
 document.getElementById('btn-continue').onclick=()=>startRun(false);
 document.getElementById('btn-new').onclick=()=>startRun(true);

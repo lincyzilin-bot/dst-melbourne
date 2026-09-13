@@ -1,21 +1,21 @@
 import * as THREE from 'three';
-/* ================= 0. ZONED LAYOUT =================
-   x+ = east, z+ = south. WORLD 200 (-100..100)
-   CBD: centre-east  | GRASSLAND: north-west | WETLAND: south-west */
+/* ================= 0. QUADRANT LAYOUT (photo ref) =================
+   x+ = east, z+ = south. WORLD 200 (-100..100), scale unchanged.
+   CBD: centre | GRASSLAND: north-west | FARM: north-east
+   WETLAND: south-west | RUIN: south-east. Rivers run in the 4-unit gaps. */
 const WORLD=200, HALF=WORLD/2, N=72, CELL=WORLD/N;
 const SAVE_KEY='dst_melbourne_zoned_v1', DAY_LEN=240, REVEAL_R=13;
-const CBD={x0:2,x1:72,z0:-38,z1:38};
-const GRASS={x0:-92,x1:-8,z0:-92,z1:-12};
-const WET={x0:-92,x1:-8,z0:12,z1:92};
-const ROADS_V=[12,28,44,60], ROADS_H=[-28,-12,4,20,34], ROAD_W=5;
-const PARKS=[{x:52,z:-20,r:9,n:'PARK'},{x:20,z:22,r:8,n:'FLAGSTAFF'}];
-const FLAGSTAFF={x:20,z:22,r:8};
-const FARM={x0:74,x1:96,z0:-28,z1:28};
-const RUIN_N={x0:-4,x1:70,z0:-88,z1:-42};
-const RUIN_S={x0:2,x1:70,z0:42,z1:92};
-const PONDS=[{x:-62,z:48,r:13},{x:-34,z:66,r:9},{x:-68,z:74,r:7}];
-const STONE_CIRCLE={x:-50,z:-55,R:7};
-const SPAWN={x:28,z:28};
+const CBD={x0:-34,x1:34,z0:-36,z1:36};
+const GRASS={x0:-92,x1:-38,z0:-92,z1:-40};
+const FARM={x0:38,x1:92,z0:-92,z1:-40};
+const WET={x0:-92,x1:-38,z0:40,z1:92};
+const RUIN={x0:38,x1:92,z0:40,z1:92};
+const ROADS_V=[-20,-4,12,26], ROADS_H=[-24,-8,8,24], ROAD_W=5;
+const PARKS=[{x:-18,z:-18,r:8,n:'PARK'},{x:16,z:16,r:8,n:'FLAGSTAFF'}];
+const FLAGSTAFF={x:16,z:16,r:8};
+const PONDS=[{x:-72,z:62,r:9},{x:-56,z:76,r:7},{x:-78,z:80,r:6}];
+const STONE_CIRCLE={x:-65,z:-66,R:7};
+const SPAWN={x:0,z:28};
 function inRect(x,z,r){return x>r.x0&&x<r.x1&&z>r.z0&&z<r.z1;}
 function isCBD(x,z){return inRect(x,z,CBD);}
 function isGrass(x,z){return inRect(x,z,GRASS);}
@@ -28,10 +28,12 @@ function isRoad(x,z){
 }
 function inPark(x,z){return PARKS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
 function inFarm(x,z){return inRect(x,z,FARM);}
-function inRuin(x,z){return inRect(x,z,RUIN_N)||inRect(x,z,RUIN_S);}
+function inRuin(x,z){return inRect(x,z,RUIN);}
 function isPond(x,z){return PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
 function isWater(x,z){return isPond(x,z);}
-function wetlandLocked(){return P.day<=3;}
+function wetlandLocked(){return P.day<=3;} // 💧 unlocks Day 4
+function farmLocked(){return P.day<=4;}     // 🚜 unlocks Day 5 (survived 4 days)
+function ruinLocked(){return P.day<=6;}     // 🏚️ unlocks Day 7 (survived 6 days)
 function zoneOf(x,z){if(isWet(x,z))return'wetland';if(isGrass(x,z))return'grassland';if(isCBD(x,z))return'cbd';if(inFarm(x,z))return'farm';if(inRuin(x,z))return'ruin';return'wilds';}
 const ZONE_ICON={cbd:'🏙️ CBD',grassland:'🌾 Grassland',wetland:'💧 Wetland',farm:'🚜 Farm',ruin:'🏚️ Ruins',wilds:'🧭 Wilds'};
 /* ================= 1. EXPLORE SAVE ================= */

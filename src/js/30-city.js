@@ -54,7 +54,7 @@ function makePine(x,z,s=1){
   for(let i=0;i<3;i++){const cone=new THREE.Mesh(new THREE.ConeGeometry((1.3-i*0.28)*s,1.3*s,9),new THREE.MeshStandardMaterial({color:greens[i%3],roughness:.9}));cone.position.y=(1.5+i*0.85)*s;cone.castShadow=true;g.add(cone);}
   g.position.set(x,0,z);g.rotation.y=Math.random()*7;scene.add(g);return g;
 }
-for(let i=0;i<14;i++){const x=(Math.random()*2-1)*90,z=-44-Math.random()*44;if(hitsSolid(x,z,1.2)||isRoad(x,z)||isWater(x,z))continue;makePine(x,z,0.8+Math.random()*0.7);}
+for(let i=0;i<14;i++){const s=randGrass();if(hitsSolid(s.x,s.z,1.2)||isRoad(s.x,s.z)||isWater(s.x,s.z))continue;makePine(s.x,s.z,0.8+Math.random()*0.7);}
 for(let i=0;i<10;i++){const s=Math.random()<.5?randGrass():randWet();if(!hitsSolid(s.x,s.z,1))makePine(s.x,s.z,0.9+Math.random()*0.6);}
 function makeLantern(x,z){
   const g=new THREE.Group();
@@ -65,4 +65,4 @@ function makeLantern(x,z){
   g.position.set(x,0,z);scene.add(g);
 }
 for(const x of ROADS_V)for(const z of ROADS_H){if(Math.random()<0.5)makeLantern(x+3.6,z+3.6);}
-makeLantern(14,44);makeLantern(30,58);makeLantern(48,60);
+makeLantern(0,44);makeLantern(-44,0);makeLantern(44,0);

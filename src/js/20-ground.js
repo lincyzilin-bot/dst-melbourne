@@ -51,8 +51,8 @@ function paintGround(){
   ditherW(FARM.x0+1,FARM.z0+1,FARM.x1-1,FARM.z1-1,['#64492e','#7d5f3d'],1500,0.3);
   for(let z=FARM.z0+2.5;z<FARM.z1-1;z+=1.6){for(let x=FARM.x0+1.5;x<FARM.x1-1;x+=0.5)px(x,z,0.34,0.2,'#4e3a22');}
   for(let z=FARM.z0+2.5;z<FARM.z1-1;z+=1.6){for(let x=FARM.x0+2;x<FARM.x1-1.5;x+=1.4)px(x,z-0.5,0.3,0.3,pick(['#6fbf5a','#549144']));}
-  // ---- RUINS: cracked slabs, missing tiles show dirt, rubble speckle ----
-  for(const Rr of [RUIN_N,RUIN_S]){
+  // ---- RUIN: cracked slabs, missing tiles show dirt, rubble speckle ----
+  for(const Rr of [RUIN]){
     fillRectW(Rr.x0,Rr.z0,Rr.x1,Rr.z1,'#6e5136');
     const slab=2.4;
     for(let z=Rr.z0;z<Rr.z1;z+=slab)for(let x=Rr.x0;x<Rr.x1;x+=slab){
@@ -108,9 +108,22 @@ function paintGround(){
   }
   g.fillStyle='#f4d35e';
   for(const x of ROADS_V)for(let z=CBD.z0+2;z<CBD.z1-2;z+=4)g.fillRect(w2u(x)-1.5,w2u(z),3,8);
-  // dirt tracks linking zones + worn edges
-  fillRectW(-8,-4,12,4,'#8a6f4d');ditherW(-8,-4,12,4,['#6b543a','#9a7f58'],300,0.3);
-  fillRectW(-50,-6,-8,-3.4,'#6b543a');fillRectW(-50,8,-8,10.6,'#8a6f4d');
+  // dirt tracks: CBD centre to each quadrant (photo ref)
+  fillRectW(-2,-66,2,-34,'#8a6f4d');ditherW(-2,-66,2,-34,['#6b543a','#9a7f58'],160,0.3);
+  fillRectW(-2,34,2,66,'#8a6f4d');ditherW(-2,34,2,66,['#6b543a','#9a7f58'],160,0.3);
+  fillRectW(-66,-2,-32,2,'#8a6f4d');ditherW(-66,-2,-32,2,['#6b543a','#9a7f58'],160,0.3);
+  fillRectW(32,-2,66,2,'#8a6f4d');ditherW(32,-2,66,2,['#6b543a','#9a7f58'],160,0.3);
+  // wiggly rivers in the gaps (photo ref): mud bank + two-tone water, walkable fords
+  function riverW(pts,w){
+    g.lineCap='round';g.lineJoin='round';
+    function stroke(color,lw){g.strokeStyle=color;g.lineWidth=lw;g.beginPath();g.moveTo(w2u(pts[0][0]),w2u(pts[0][1]));for(let i=1;i<pts.length;i++){const mx=(pts[i-1][0]+pts[i][0])/2+(R(-1,1)),my=(pts[i-1][1]+pts[i][1])/2+(R(-1,1));g.quadraticCurveTo(w2u(pts[i-1][0]),w2u(pts[i-1][1]),w2u(mx),w2u(my));g.lineTo(w2u(pts[i][0]),w2u(pts[i][1]));}g.stroke();}
+    const S=GS/WORLD;
+    stroke('#8a7150',(w+1.6)*S);stroke('#17494a',w*S);stroke('#1f7f7a',(w*0.6)*S);
+  }
+  riverW([[2,-100],[-3,-80],[4,-64],[-2,-48],[1,-36]],2.2);   // north: Grass|Farm
+  riverW([[34,2],[50,-3],[66,3],[82,-2],[100,1]],2.2);        // east: Farm|Ruin
+  riverW([[-100,-1],[-80,3],[-60,-3],[-38,1]],2.2);           // west: Grass|Wet
+  riverW([[0,36],[-4,52],[3,68],[-5,84],[2,100]],2.4);        // south: Wet|Ruin
   // soft large light variation so zones feel lit like pic2/3
   for(let i=0;i<8;i++){const gr=g.createRadialGradient(R(0,GS),R(0,GS),10,R(0,GS),R(0,GS),R(150,380));gr.addColorStop(0,'rgba(255,255,240,.05)');gr.addColorStop(1,'rgba(0,0,20,0)');g.fillStyle=gr;g.fillRect(0,0,GS,GS);}
   return c;
