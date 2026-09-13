@@ -62,8 +62,10 @@ const STONE_CIRCLE={x:-65,z:-66,R:7};
 const SPAWN={x:12,z:24}; // road intersection (V 12 x H 24): always clear of buildings
 function inRect(x,z,r){return x>r.x0&&x<r.x1&&z>r.z0&&z<r.z1;}
 function isCBD(x,z){return inRect(x,z,CBD);}
-function isGrass(x,z){return inRect(x,z,GRASS);}
-function isWet(x,z){return inRect(x,z,WET);}
+// NB: outer quadrants overlap the CBD + moat on paper — always exclude both,
+// or day-locks would freeze the player inside the CBD and block the fords.
+function isGrass(x,z){return inRect(x,z,GRASS)&&!isCBD(x,z)&&!isMoat(x,z);}
+function isWet(x,z){return inRect(x,z,WET)&&!isCBD(x,z)&&!isMoat(x,z);}
 function isRoad(x,z){
   if(!isCBD(x,z))return false;
   for(const rx of ROADS_V)if(Math.abs(x-rx)<ROAD_W/2)return true;
@@ -71,8 +73,8 @@ function isRoad(x,z){
   return false;
 }
 function inPark(x,z){return PARKS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
-function inFarm(x,z){return inRect(x,z,FARM);}
-function inRuin(x,z){return inRect(x,z,RUIN);}
+function inFarm(x,z){return inRect(x,z,FARM)&&!isCBD(x,z)&&!isMoat(x,z);}
+function inRuin(x,z){return inRect(x,z,RUIN)&&!isCBD(x,z)&&!isMoat(x,z);}
 function isPond(x,z){return PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
 function inFord(x,z){return FORDS.some(f=>x>f.x0&&x<f.x1&&z>f.z0&&z<f.z1);}
 function isMoat(x,z){

@@ -1,3 +1,6 @@
+## v1.4.2 - 20260913-2150
+- fix movement freeze: outer zones exclude CBD and moat so day-locks no longer trigger inside CBD or on fords
+
 ## v1.4.1 - 20260913-2146
 - fix brown CBD: moat paints ring strips only; spawn moved to road intersection so left-right walk is open
 
