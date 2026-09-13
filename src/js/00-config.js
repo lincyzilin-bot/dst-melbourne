@@ -3,8 +3,8 @@ import * as THREE from 'three';
    x+ = east, z+ = south. WORLD 200 (-100..100), scale unchanged.
    CBD: centre | outer ring fills the whole map edge-to-edge, no gaps:
    GRASSLAND NW (x<0,z<0) | FARM NE (x>0,z<0) | WETLAND SW (x<0,z>0) | RUIN SE.
-   A wide moat rings the CBD (boat water); 4 dirt fords keep it playable
-   until the boat arrives. Small inter-zone rivers are visual-only for now. */
+   A wide moat rings the CBD (cross at 4 dirt fords); small inter-zone rivers
+   need player-built bridges — no free crossings by design. */
 const WORLD=200, HALF=WORLD/2, N=72, CELL=WORLD/N;
 const SAVE_KEY='dst_melbourne_zoned_v1', DAY_LEN=240, REVEAL_R=13;
 const CBD={x0:-34,x1:34,z0:-36,z1:36};
@@ -14,7 +14,7 @@ const WET={x0:-100,x1:0,z0:0,z1:100};
 const RUIN={x0:0,x1:100,z0:0,z1:100};
 // CBD moat: water ring between CBD edge and this expanded box (wide river)
 const MOAT={x0:-39,x1:39,z0:-41,z1:41};
-// dirt fords across the moat (temporary until the boat lands)
+// dirt fords across the moat — the only free water crossings in the game
 const FORDS=[{x0:-2.5,x1:2.5,z0:-41,z1:-36},{x0:-2.5,x1:2.5,z0:36,z1:41},{x0:-39,x1:-34,z0:-2.5,z1:2.5},{x0:34,x1:39,z0:-2.5,z1:2.5}];
 // small rivers between outer quadrants (BLOCKING — cross only by bridge)
 const RIVERS=[
@@ -36,13 +36,9 @@ function isRiver(x,z){
   }
   return false;
 }
-// bridges: 4 pre-placed + player-built (session only)
-const FIXED_BRIDGES=[
-  {x0:-2.5,x1:5.5,z0:-72.5,z1:-67.5},
-  {x0:64.5,x1:69.5,z0:-1,z1:5},
-  {x0:-70.5,x1:-65.5,z0:-3,z1:3},
-  {x0:-0.5,x1:6.5,z0:67.5,z1:72.5}
-];
+// bridges: NO pre-placed ones by design — the player must build every crossing.
+// (This is the intended limitation: gather 4 log + 2 stone per river.)
+const FIXED_BRIDGES=[];
 const bridges=[];
 function onBridge(x,z){
   for(const b of FIXED_BRIDGES)if(x>b.x0&&x<b.x1&&z>b.z0&&z<b.z1)return true;

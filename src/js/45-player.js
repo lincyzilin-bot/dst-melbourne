@@ -17,31 +17,16 @@ const legL=limb(0.19,0.85,pantsM);legL.position.set(-0.15,0.9,0);player.add(legL
 const legR=limb(0.19,0.85,pantsM);legR.position.set(0.15,0.9,0);player.add(legR);
 for(const l of[legL,legR]){const b=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.14,0.3),bootM);b.position.set(0,-0.9,0.05);l.add(b);}
 scene.add(player);
-// rowboat shell around the player, shown while paddling (select 🚣 in inventory)
-const boatHull=new THREE.Group();
-(function(){
-  const hull=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.5,2.4),new THREE.MeshStandardMaterial({color:0x7a4a28,roughness:.9}));
-  hull.position.y=0.35;hull.castShadow=true;boatHull.add(hull);
-  const rim=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.18,2.6),new THREE.MeshStandardMaterial({color:0x5d3a20,roughness:.9}));
-  rim.position.y=0.62;boatHull.add(rim);
-  for(const sx of[-1,1]){const seat=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.12,0.35),new THREE.MeshStandardMaterial({color:0x8a6a3f}));seat.position.set(0,0.55,sx*0.6);boatHull.add(seat);}
-})();
-boatHull.visible=false;player.add(boatHull);
 const P={x:SPAWN.x,z:SPAWN.z,face:0,hp:100,hunger:100,sanity:100,day:1,dayT:0.15,dead:false,speed:7.5,walkPhase:0,moving:false,atkAnim:0};
 if(save.player)Object.assign(P,save.player);
-function inBoat(){try{return sel==='boat'&&inv.boat>0;}catch(e){return false;}} // TDZ-safe: sel/inv load after this file
-function boatPassable(x,z){return isMoat(x,z)||isPond(x,z);}
 function walkable(x,z){
   if(Math.abs(x)>96||Math.abs(z)>96)return false;
   if(hitsSolid(x,z))return false;
   if(isWet(x,z)&&wetlandLocked())return false; // 🔒 locked until Day 4
   if(inFarm(x,z)&&farmLocked())return false;   // 🔒 locked until Day 5
   if(inRuin(x,z)&&ruinLocked())return false;   // 🔒 locked until Day 7
-  if(isRiver(x,z)&&!onBridge(x,z))return false; // small rivers need bridges (boat can't cross)
-  if(isWater(x,z)){
-    if(inBoat()&&boatPassable(x,z))return true; // 🚣 rowboat paddles the moat/ponds
-    return false;
-  }
+  if(isRiver(x,z)&&!onBridge(x,z))return false; // small rivers need player-built bridges
+  if(isWater(x,z))return false; // moat (fords exempt inside isMoat) + ponds block
   return true;
 }
 if(!walkable(P.x,P.z)){P.x=SPAWN.x;P.z=SPAWN.z;}

@@ -9,15 +9,14 @@ function movePlayer(dt){
   if(P.moving){
     if(L>1){ix/=L;iz/=L;}
     if(keys.KeyW||keys.KeyA||keys.KeyS||keys.KeyD||keys.ArrowUp||keys.ArrowDown||keys.ArrowLeft||keys.ArrowRight)clickTarget=null;
-    const eff=P.speed*(inBoat()?(boatPassable(P.x,P.z)?1.0:0.5):1);
-    const nx=P.x+ix*eff*dt,nz=P.z+iz*eff*dt;
+    const nx=P.x+ix*P.speed*dt,nz=P.z+iz*P.speed*dt;
     // zone gates: block entry + message while locked
     function gateMsg(test,msg){if(test(nx,nz)){lockToastCd-=dt;if(lockToastCd<=0){lockToastCd=3;toast(msg);}return true;}return false;}
     let blockedX=false;
     if(gateMsg((x,z)=>isWet(x,z)&&wetlandLocked(),'🔒 Wetland locked — survive past Day 3 (reach Day 4)!'))blockedX=true;
     else if(gateMsg((x,z)=>inFarm(x,z)&&farmLocked(),'🔒 Farm locked — survive 4 days (reach Day 5)!'))blockedX=true;
     else if(gateMsg((x,z)=>inRuin(x,z)&&ruinLocked(),'🔒 Ruins locked — survive 6 days (reach Day 7)!'))blockedX=true;
-    else if(gateMsg((x,z)=>isMoat(x,z)&&!(inBoat()&&boatPassable(x,z)),'🌊 Wide moat — cross at dirt fords or row a 🚣 boat (V)!'))blockedX=true;
+    else if(gateMsg((x,z)=>isMoat(x,z),'🌊 Wide moat — cross at the dirt fords!'))blockedX=true;
     else if(gateMsg((x,z)=>isRiver(x,z)&&!onBridge(x,z),'🌊 Small river — cross at a 🌉 bridge (B)!'))blockedX=true;
     else if(walkable(nx,P.z))P.x=nx;
     if((isWet(P.x,nz)&&wetlandLocked())||(inFarm(P.x,nz)&&farmLocked())||(inRuin(P.x,nz)&&ruinLocked())){/* blocked on z too */}
@@ -25,8 +24,6 @@ function movePlayer(dt){
     P.face=Math.atan2(ix,iz);P.walkPhase+=dt*12;
   }
   player.position.set(P.x,0,P.z);player.rotation.y=P.face;
-  boatHull.visible=inBoat();
-  if(inBoat()&&boatPassable(P.x,P.z))boatHull.position.y=Math.sin(performance.now()*0.003)*0.08;
   const sw=P.moving?Math.sin(P.walkPhase)*0.55:0;
   legL.rotation.x=sw;legR.rotation.x=-sw;armL.rotation.x=-sw*0.8;
   if(P.atkAnim>0){P.atkAnim-=dt;armR.rotation.x=-2.2+P.atkAnim*6;}else armR.rotation.x=sw*0.8;
@@ -101,12 +98,12 @@ addEventListener('beforeunload',()=>{if(playing){commitLifetime();save.player=P.
 /* ================= 12. MENU ================= */
 function refreshStartPanel(){document.getElementById('start-pct').textContent=lifetimePct().toFixed(1)+'%';const rl=document.getElementById('runs-list');rl.innerHTML=save.runs.length?save.runs.map((r,i)=>`<div>#${save.totalRuns-i} · ${r.d} — Day ${r.day}, lifetime ${r.pct}% (+${r.added})</div>`).join(''):'<div>No runs yet. Lace up your boots, mate.</div>';document.getElementById('btn-continue').style.display=save.player?'':'none';}
 function startRun(fresh){
-  if(fresh){if(runAdded>0||P.day>1){commitLifetime();save.runs.unshift({d:new Date().toLocaleString(),day:P.day,pct:+lifetimePct().toFixed(1),added:runAdded});save.runs=save.runs.slice(0,20);}save.totalRuns++;Object.assign(P,{x:SPAWN.x,z:SPAWN.z,hp:100,hunger:100,sanity:100,day:1,dayT:0.15,dead:false});inv={berries:2,wheat:0,morsel:0,flower:0,log:0,stone:0,meat:0,axe:0,pick:0,spear:0,firekit:0,garland:0,bridgekit:0,boat:0};sel='berries';for(const m of mobs)scene.remove(m.mesh);mobs.length=0;for(const f of fires)scene.remove(f.mesh);fires.length=0;for(const r of rabbits)scene.remove(r.mesh);rabbits.length=0;for(const p of possums)scene.remove(p.mesh);possums.length=0;for(const b of bridges)if(b.group)scene.remove(b.group);bridges.length=0;for(let i=0;i<21;i++)spawnRabbit(randGrass());for(let i=0;i<5;i++){const a=Math.random()*7,r=2+Math.random()*5;spawnPossum(FLAGSTAFF.x+Math.cos(a)*r,FLAGSTAFF.z+Math.sin(a)*r);}save.player=null;}
+  if(fresh){if(runAdded>0||P.day>1){commitLifetime();save.runs.unshift({d:new Date().toLocaleString(),day:P.day,pct:+lifetimePct().toFixed(1),added:runAdded});save.runs=save.runs.slice(0,20);}save.totalRuns++;Object.assign(P,{x:SPAWN.x,z:SPAWN.z,hp:100,hunger:100,sanity:100,day:1,dayT:0.15,dead:false});inv={berries:2,wheat:0,morsel:0,flower:0,log:0,stone:0,meat:0,axe:0,pick:0,spear:0,firekit:0,garland:0,bridgekit:0};sel='berries';for(const m of mobs)scene.remove(m.mesh);mobs.length=0;for(const f of fires)scene.remove(f.mesh);fires.length=0;for(const r of rabbits)scene.remove(r.mesh);rabbits.length=0;for(const p of possums)scene.remove(p.mesh);possums.length=0;for(const b of bridges)if(b.group)scene.remove(b.group);bridges.length=0;for(let i=0;i<21;i++)spawnRabbit(randGrass());for(let i=0;i<5;i++){const a=Math.random()*7,r=2+Math.random()*5;spawnPossum(FLAGSTAFF.x+Math.cos(a)*r,FLAGSTAFF.z+Math.sin(a)*r);}save.player=null;}
   else if(save.player){Object.assign(P,save.player);inv=Object.assign(inv,save.player.inv);if(!walkable(P.x,P.z)){P.x=SPAWN.x;P.z=SPAWN.z;}}
   runAdded=0;persist(false);
   document.getElementById('start-overlay').classList.add('hidden');document.getElementById('dead-overlay').classList.add('hidden');
   document.getElementById('hud').classList.add('on');playing=true;P.dead=false;renderInv();drawMinimap();updateExploreUI();
-  toast(fresh?'🧭 New run! Moat: fords or 🚣 boat (V). Rivers: 🌉 bridges (B). Wet D4 · Farm D5 · Ruins D7.':'🧭 Welcome back. Map saved.');
+  toast(fresh?'🧭 New run! Moat at dirt fords, rivers need 🌉 bridges (B). Wet D4 · Farm D5 · Ruins D7.':'🧭 Welcome back. Map saved.');
 }
 document.getElementById('btn-continue').onclick=()=>startRun(false);
 document.getElementById('btn-new').onclick=()=>startRun(true);

@@ -1,12 +1,12 @@
 /* ================= 9. INPUT ================= */
 const keys={};let playing=false,actCd=0,clickTarget=null;
-addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();keys[e.code]=true;if(e.code==='KeyE')doAct();if(e.code==='Space')doAttack();if(e.code==='KeyQ')doEat();if(e.code==='KeyC')doFire();if(e.code==='KeyB')doBridge();if(e.code==='KeyV')doBoat();});
+addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();keys[e.code]=true;if(e.code==='KeyE')doAct();if(e.code==='Space')doAttack();if(e.code==='KeyQ')doEat();if(e.code==='KeyC')doFire();if(e.code==='KeyB')doBridge();});
 addEventListener('keyup',e=>keys[e.code]=false);
 const ray=new THREE.Raycaster(),mouseV=new THREE.Vector2();
 renderer.domElement.addEventListener('pointerdown',e=>{mouseV.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouseV,camera);const hit=ray.intersectObject(ground)[0];if(hit&&walkable(hit.point.x,hit.point.z))clickTarget={x:hit.point.x,z:hit.point.z};});
 document.getElementById('btn-act').onclick=()=>doAct();document.getElementById('btn-atk').onclick=()=>doAttack();
 document.getElementById('btn-eat').onclick=()=>doEat();document.getElementById('btn-fire').onclick=()=>doFire();
-document.getElementById('btn-bridge').onclick=()=>doBridge();document.getElementById('btn-boat').onclick=()=>doBoat();
+document.getElementById('btn-bridge').onclick=()=>doBridge();
 function toast(msg){const box=document.getElementById('toast');const d=document.createElement('div');d.className='toastmsg';d.textContent=msg;box.appendChild(d);setTimeout(()=>d.remove(),2600);while(box.children.length>3)box.firstChild.remove();}
 function nearestInteract(maxD=2.8){let best=null,bd=maxD;for(const o of interactables){if(o.gone)continue;const d=Math.hypot(o.x-P.x,o.z-P.z);if(d<bd){bd=d;best=o;}}return best;}
 function nearestRabbit(maxD=2.8){let best=null,bd=maxD;for(const r of rabbits){const d=Math.hypot(r.x-P.x,r.z-P.z);if(d<bd){bd=d;best=r;}}return best;}
@@ -48,13 +48,6 @@ function doAttack(){
   renderInv();
 }
 function doEat(){if(!playing||P.dead)return;const it=ITEMS[sel];if(!it||!it.food||!(inv[sel]>0)){toast('Select berries / wheat / morsel / meat / petals first');return;}inv[sel]--;P.hunger=Math.min(100,P.hunger+it.food);if(sel==='flower')P.sanity=Math.min(100,P.sanity+4);if(sel==='garland'){P.sanity=Math.min(100,P.sanity+20);}toast(`😋 +${it.food} hunger`);renderInv();}
-function doBoat(){
-  if(!playing||P.dead)return;
-  if(!(inv.boat>0)){toast('Craft a 🚣 Rowboat first (5 log + 2 stone)');return;}
-  sel=(sel==='boat')?'berries':'boat';
-  toast(sel==='boat'?'🚣 Boarded! Paddle over moat/pond water — slow on land. Bridges still needed for small rivers.':'🚣 Stepped ashore.');
-  renderInv();
-}
 function doFire(){if(!playing||P.dead)return;if(!(inv.firekit>0)){toast('Craft a 🔥 Fire kit first (3 log + 1 stone)');return;}inv.firekit--;const fx=P.x+Math.sin(P.face)*1.5,fz=P.z+Math.cos(P.face)*1.5;placeFire(walkable(fx,fz)?fx:P.x,walkable(fx,fz)?fz:P.z);toast('🔥 Campfire lit!');renderInv();}
 function doBridge(){
   if(!playing||P.dead)return;
@@ -62,7 +55,7 @@ function doBridge(){
   let nearRiver=false;
   for(let a=0;a<8;a++){const tx=P.x+Math.cos(a/8*Math.PI*2)*3.5,tz=P.z+Math.sin(a/8*Math.PI*2)*3.5;if(isRiver(tx,tz)){nearRiver=true;break;}}
   if(!nearRiver&&!isRiver(P.x,P.z)){
-    if(isMoat(P.x,P.z)){toast('🌊 Too wide! Bridges can\'t span the moat — craft a 🚣 Rowboat (V)!');return;}
+    if(isMoat(P.x,P.z)){toast('🌊 Too wide! Bridges are for small rivers — use the dirt fords.');return;}
     toast('Stand next to a small river to lay a bridge (B)');
     return;
   }
