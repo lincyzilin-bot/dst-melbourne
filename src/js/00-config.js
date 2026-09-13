@@ -59,7 +59,7 @@ const PARKS=[{x:-18,z:-18,r:8,n:'PARK'},{x:16,z:16,r:8,n:'FLAGSTAFF'}];
 const FLAGSTAFF={x:16,z:16,r:8};
 const PONDS=[{x:-72,z:62,r:9},{x:-56,z:76,r:7},{x:-78,z:80,r:6}];
 const STONE_CIRCLE={x:-65,z:-66,R:7};
-const SPAWN={x:0,z:28};
+const SPAWN={x:12,z:24}; // road intersection (V 12 x H 24): always clear of buildings
 function inRect(x,z,r){return x>r.x0&&x<r.x1&&z>r.z0&&z<r.z1;}
 function isCBD(x,z){return inRect(x,z,CBD);}
 function isGrass(x,z){return inRect(x,z,GRASS);}

@@ -113,11 +113,15 @@ function paintGround(){
   fillRectW(-2,34,2,66,'#8a6f4d');ditherW(-2,34,2,66,['#6b543a','#9a7f58'],160,0.3);
   fillRectW(-66,-2,-32,2,'#8a6f4d');ditherW(-66,-2,-32,2,['#6b543a','#9a7f58'],160,0.3);
   fillRectW(32,-2,66,2,'#8a6f4d');ditherW(32,-2,66,2,['#6b543a','#9a7f58'],160,0.3);
-  // CBD moat: wide blocking ring with mud banks (fords stay walkable dirt)
-  fillRectW(MOAT.x0-1,MOAT.z0-1,MOAT.x1+1,MOAT.z1+1,'#5d4a30');
-  fillRectW(MOAT.x0,MOAT.z0,MOAT.x1,MOAT.z1,'#17494a');
-  fillRectW(MOAT.x0+0.8,MOAT.z0+0.8,MOAT.x1-0.8,MOAT.z1-0.8,'#1f7f7a');
-  fillRectW(CBD.x0-0.5,CBD.z0-0.5,CBD.x1+0.5,CBD.z1+0.5,'#8a7150');
+  // CBD moat: wide blocking ring with mud banks (fords stay walkable dirt).
+  // NOTE: paint as 4 ring strips only — never over the CBD slab interior.
+  function ringW(x0,x1,z0,z1,color){
+    fillRectW(x0,z0,x1,CBD.z0,color);fillRectW(x0,CBD.z1,x1,z1,color);
+    fillRectW(x0,CBD.z0,CBD.x0,CBD.z1,color);fillRectW(CBD.x1,CBD.z0,x1,CBD.z1,color);
+  }
+  ringW(MOAT.x0-1,MOAT.x1+1,MOAT.z0-1,MOAT.z1+1,'#5d4a30');
+  ringW(MOAT.x0,MOAT.x1,MOAT.z0,MOAT.z1,'#17494a');
+  ringW(MOAT.x0+0.8,MOAT.x1-0.8,MOAT.z0+0.8,MOAT.z1-0.8,'#1f7f7a');
   for(const f of FORDS){fillRectW(f.x0,f.z0,f.x1,f.z1,'#8a6f4d');ditherW(f.x0,f.z0,f.x1,f.z1,['#6b543a','#9a7f58'],40,0.3);}
   // small quadrant rivers (BLOCKING — cross only by bridge); painted from RIVERS
   function riverW(pts,w){

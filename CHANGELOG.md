@@ -1,3 +1,6 @@
+## v1.4.1 - 20260913-2146
+- fix brown CBD: moat paints ring strips only; spawn moved to road intersection so left-right walk is open
+
 ## v1.4.0 - 20260913-2141
 - craftable rowboat (V): paddle moat and ponds, slow on land, hull visual, rivers still need bridges
 
