@@ -14,8 +14,46 @@ const WET={x0:-100,x1:0,z0:0,z1:100};
 const RUIN={x0:0,x1:100,z0:0,z1:100};
 // CBD moat: water ring between CBD edge and this expanded box (wide river)
 const MOAT={x0:-39,x1:39,z0:-41,z1:41};
-// dirt fords across the moat (temporary until bridge/boat lands)
+// dirt fords across the moat (temporary until the boat lands)
 const FORDS=[{x0:-2.5,x1:2.5,z0:-41,z1:-36},{x0:-2.5,x1:2.5,z0:36,z1:41},{x0:-39,x1:-34,z0:-2.5,z1:2.5},{x0:34,x1:39,z0:-2.5,z1:2.5}];
+// small rivers between outer quadrants (BLOCKING — cross only by bridge)
+const RIVERS=[
+  {pts:[[2,-100],[-3,-80],[4,-64],[-2,-52],[1,-41]],w:2.0},   // north: Grass|Farm
+  {pts:[[39,2],[55,-3],[71,3],[86,-2],[100,1]],w:2.0},        // east: Farm|Ruin
+  {pts:[[-100,-1],[-80,3],[-60,-3],[-39,1]],w:2.0},           // west: Grass|Wet
+  {pts:[[0,41],[-4,56],[3,70],[-5,86],[2,100]],w:2.0}         // south: Wet|Ruin
+];
+function distSeg(px,pz,ax,az,bx,bz){
+  const dx=bx-ax,dz=bz-az,L2=dx*dx+dz*dz;
+  let t=L2?((px-ax)*dx+(pz-az)*dz)/L2:0;t=Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(ax+dx*t),pz-(az+dz*t));
+}
+function isRiver(x,z){
+  for(const r of RIVERS){
+    for(let i=0;i<r.pts.length-1;i++){
+      if(distSeg(x,z,r.pts[i][0],r.pts[i][1],r.pts[i+1][0],r.pts[i+1][1])<r.w/2)return true;
+    }
+  }
+  return false;
+}
+// bridges: 4 pre-placed + player-built (session only)
+const FIXED_BRIDGES=[
+  {x0:-2.5,x1:5.5,z0:-72.5,z1:-67.5},
+  {x0:64.5,x1:69.5,z0:-1,z1:5},
+  {x0:-70.5,x1:-65.5,z0:-3,z1:3},
+  {x0:-0.5,x1:6.5,z0:67.5,z1:72.5}
+];
+const bridges=[];
+function onBridge(x,z){
+  for(const b of FIXED_BRIDGES)if(x>b.x0&&x<b.x1&&z>b.z0&&z<b.z1)return true;
+  for(const b of bridges)if(x>b.x0&&x<b.x1&&z>b.z0&&z<b.z1)return true;
+  return false;
+}
+function addBridge(x,z,horiz){
+  if(bridges.length>=12){toast('Max 12 bridges — make them count!');return null;}
+  const b=horiz?{x0:x-4,x1:x+4,z0:z-2.5,z1:z+2.5}:{x0:x-2.5,x1:x+2.5,z0:z-4,z1:z+4};
+  bridges.push(b);return b;
+}
 const ROADS_V=[-20,-4,12,26], ROADS_H=[-24,-8,8,24], ROAD_W=5;
 const PARKS=[{x:-18,z:-18,r:8,n:'PARK'},{x:16,z:16,r:8,n:'FLAGSTAFF'}];
 const FLAGSTAFF={x:16,z:16,r:8};
@@ -42,7 +80,7 @@ function isMoat(x,z){
   const inInner=isCBD(x,z);
   return inOuter&&!inInner&&!inFord(x,z);
 }
-function isWater(x,z){return isPond(x,z)||isMoat(x,z);}
+function isWater(x,z){return isPond(x,z)||isMoat(x,z)||(isRiver(x,z)&&!onBridge(x,z));}
 function wetlandLocked(){return P.day<=3;} // 💧 unlocks Day 4
 function farmLocked(){return P.day<=4;}     // 🚜 unlocks Day 5 (survived 4 days)
 function ruinLocked(){return P.day<=6;}     // 🏚️ unlocks Day 7 (survived 6 days)

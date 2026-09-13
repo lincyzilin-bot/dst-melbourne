@@ -119,17 +119,19 @@ function paintGround(){
   fillRectW(MOAT.x0+0.8,MOAT.z0+0.8,MOAT.x1-0.8,MOAT.z1-0.8,'#1f7f7a');
   fillRectW(CBD.x0-0.5,CBD.z0-0.5,CBD.x1+0.5,CBD.z1+0.5,'#8a7150');
   for(const f of FORDS){fillRectW(f.x0,f.z0,f.x1,f.z1,'#8a6f4d');ditherW(f.x0,f.z0,f.x1,f.z1,['#6b543a','#9a7f58'],40,0.3);}
-  // wiggly rivers in the gaps (photo ref): mud bank + two-tone water, walkable fords
+  // small quadrant rivers (BLOCKING — cross only by bridge); painted from RIVERS
   function riverW(pts,w){
     g.lineCap='round';g.lineJoin='round';
     function stroke(color,lw){g.strokeStyle=color;g.lineWidth=lw;g.beginPath();g.moveTo(w2u(pts[0][0]),w2u(pts[0][1]));for(let i=1;i<pts.length;i++){const mx=(pts[i-1][0]+pts[i][0])/2+(R(-1,1)),my=(pts[i-1][1]+pts[i][1])/2+(R(-1,1));g.quadraticCurveTo(w2u(pts[i-1][0]),w2u(pts[i-1][1]),w2u(mx),w2u(my));g.lineTo(w2u(pts[i][0]),w2u(pts[i][1]));}g.stroke();}
     const S=GS/WORLD;
     stroke('#8a7150',(w+1.6)*S);stroke('#17494a',w*S);stroke('#1f7f7a',(w*0.6)*S);
   }
-  riverW([[2,-100],[-3,-80],[4,-64],[-2,-52],[1,-41]],2.0);   // north: Grass|Farm
-  riverW([[39,2],[55,-3],[71,3],[86,-2],[100,1]],2.0);        // east: Farm|Ruin
-  riverW([[-100,-1],[-80,3],[-60,-3],[-39,1]],2.0);           // west: Grass|Wet
-  riverW([[0,41],[-4,56],[3,70],[-5,86],[2,100]],2.0);        // south: Wet|Ruin
+  for(const r of RIVERS)riverW(r.pts,r.w);
+  // bridge planks over rivers (pre-placed; player kits add more at runtime)
+  for(const b of FIXED_BRIDGES){
+    fillRectW(b.x0,b.z0,b.x1,b.z1,'#7a5230');
+    ditherW(b.x0,b.z0,b.x1,b.z1,['#8a6a3f','#5d3a20'],40,0.3);
+  }
   // soft large light variation so zones feel lit like pic2/3
   for(let i=0;i<8;i++){const gr=g.createRadialGradient(R(0,GS),R(0,GS),10,R(0,GS),R(0,GS),R(150,380));gr.addColorStop(0,'rgba(255,255,240,.05)');gr.addColorStop(1,'rgba(0,0,20,0)');g.fillStyle=gr;g.fillRect(0,0,GS,GS);}
   return c;
@@ -158,3 +160,24 @@ for(const p of PONDS){
   const fordM=new THREE.MeshStandardMaterial({color:0x8a6f4d,roughness:1});
   for(const f of FORDS){const m=new THREE.Mesh(new THREE.PlaneGeometry(f.x1-f.x0,f.z1-f.z0),fordM);m.rotation.x=-Math.PI/2;m.position.set((f.x0+f.x1)/2,0.08,(f.z0+f.z1)/2);m.receiveShadow=true;scene.add(m);}
 })();
+// bridges: plank + rails; reused for player-built kits at runtime
+const bridgeWoodM=new THREE.MeshStandardMaterial({color:0x7a5230,roughness:.9});
+const bridgeRailM=new THREE.MeshStandardMaterial({color:0x5d3a20,roughness:.9});
+function buildBridgeMesh(b){
+  const grp=new THREE.Group();
+  const w=b.x1-b.x0,d=b.z1-b.z0;
+  const cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(w,0.25,d),bridgeWoodM);
+  deck.position.set(cx,0.15,cz);deck.receiveShadow=true;deck.castShadow=true;grp.add(deck);
+  const horiz=w>=d;
+  for(const s of [-1,1]){
+    const rail=horiz
+      ?new THREE.Mesh(new THREE.BoxGeometry(w,0.5,0.25),bridgeRailM)
+      :new THREE.Mesh(new THREE.BoxGeometry(0.25,0.5,d),bridgeRailM);
+    if(horiz)rail.position.set(cx,0.55,cz+s*(d/2-0.15));
+    else rail.position.set(cx+s*(w/2-0.15),0.55,cz);
+    rail.castShadow=true;grp.add(rail);
+  }
+  scene.add(grp);b.group=grp;return grp;
+}
+for(const b of FIXED_BRIDGES)buildBridgeMesh(b);

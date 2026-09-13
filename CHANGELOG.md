@@ -1,3 +1,6 @@
+## v1.3.0 - 20260913-2138
+- small rivers now block, 4 pre-placed bridges plus craftable bridge kit (B)
+
 ## v1.2.0 - 20260913-2134
 - filled quadrants edge-to-edge, CBD moat blocks water with 4 dirt fords, farm plot fenced
 
