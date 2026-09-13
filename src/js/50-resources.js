@@ -4,10 +4,10 @@ const interactables=[],mobs=[],fires=[],rabbits=[],possums=[];
 const GIFTS=['berries','wheat','morsel','meat','flower'];
 function addEntity(o){o.mesh.position.set(o.x,0,o.z);world.add(o.mesh);interactables.push(o);return o;}
 function randIn(rect){for(let t=0;t<60;t++){const x=rect.x0+2+Math.random()*(rect.x1-rect.x0-4),z=rect.z0+2+Math.random()*(rect.z1-rect.z0-4);if(!walkable(x,z)||isRoad(x,z))continue;if(Math.hypot(x-P.x,z-P.z)<3)continue;return{x,z};}return{x:SPAWN.x+3,z:SPAWN.z};}
-function randCBD(){return randIn(CBD);}function randGrass(){for(let t=0;t<60;t++){const x=GRASS.x0+2+Math.random()*(GRASS.x1-GRASS.x0-4),z=GRASS.z0+2+Math.random()*(GRASS.z1-GRASS.z0-4);if(isWater(x,z)||hitsSolid(x,z,0.6))continue;return{x,z};}return{x:-50,z:-50};}
-function randWet(){for(let t=0;t<60;t++){const x=WET.x0+2+Math.random()*(WET.x1-WET.x0-4),z=WET.z0+2+Math.random()*(WET.z1-WET.z0-4);if(isWater(x,z)||hitsSolid(x,z,0.6))continue;return{x,z};}return{x:-50,z:40};}
-function randFarm(){for(let t=0;t<40;t++){const x=FARM.x0+1.5+Math.random()*(FARM.x1-FARM.x0-3),z=FARM.z0+1.5+Math.random()*(FARM.z1-FARM.z0-3);if(hitsSolid(x,z,0.8))continue;return{x,z};}return{x:65,z:-66};}
-function randRuin(){for(let t=0;t<40;t++){const x=RUIN.x0+2+Math.random()*(RUIN.x1-RUIN.x0-4),z=RUIN.z0+2+Math.random()*(RUIN.z1-RUIN.z0-4);if(hitsSolid(x,z,0.9))continue;return{x,z};}return{x:65,z:66};}
+function randCBD(){return randIn(CBD);}function randGrass(){for(let t=0;t<60;t++){const x=GRASS.x0+2+Math.random()*(GRASS.x1-GRASS.x0-4),z=GRASS.z0+2+Math.random()*(GRASS.z1-GRASS.z0-4);if(isCBD(x,z)||isWater(x,z)||hitsSolid(x,z,0.6))continue;return{x,z};}return{x:-50,z:-50};}
+function randWet(){for(let t=0;t<60;t++){const x=WET.x0+2+Math.random()*(WET.x1-WET.x0-4),z=WET.z0+2+Math.random()*(WET.z1-WET.z0-4);if(isCBD(x,z)||isWater(x,z)||hitsSolid(x,z,0.6))continue;return{x,z};}return{x:-50,z:60};}
+function randFarm(){for(let t=0;t<40;t++){const x=FARM.x0+1.5+Math.random()*(FARM.x1-FARM.x0-3),z=FARM.z0+1.5+Math.random()*(FARM.z1-FARM.z0-3);if(isCBD(x,z)||isWater(x,z)||hitsSolid(x,z,0.8))continue;return{x,z};}return{x:65,z:-66};}
+function randRuin(){for(let t=0;t<40;t++){const x=RUIN.x0+2+Math.random()*(RUIN.x1-RUIN.x0-4),z=RUIN.z0+2+Math.random()*(RUIN.z1-RUIN.z0-4);if(isCBD(x,z)||isWater(x,z)||hitsSolid(x,z,0.9))continue;return{x,z};}return{x:65,z:66};}
 const trunkM=new THREE.MeshStandardMaterial({color:0x6b4423,roughness:.9});
 const leafM=new THREE.MeshStandardMaterial({color:0x2f7d32,roughness:.8});
 function makeTree(x,z){const g=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.26,1.8,8),trunkM);tr.position.y=0.9;tr.castShadow=true;g.add(tr);const c=new THREE.Mesh(new THREE.SphereGeometry(0.95,10,10),leafM);c.position.y=2.2;c.castShadow=true;g.add(c);return addEntity({kind:'tree',mesh:g,x,z,hp:3});}
@@ -24,7 +24,7 @@ function makeFlower(x,z){const g=new THREE.Group();const stem=new THREE.Mesh(new
   for(let i=0;i<40;i++){const s=randCBD();makeGrassTuft(s.x,s.z);}
   for(let i=0;i<30;i++){const s=randCBD();makeWheat(s.x,s.z);}
   // NW grassland: mainly rabbits + wheat (dense clusters)
-  for(let c=0;c<18;c++){const ctr=randGrass();for(let j=0;j<12;j++){const x=ctr.x+(Math.random()+Math.random()+Math.random()-1.5)*8,z=ctr.z+(Math.random()+Math.random()+Math.random()-1.5)*8;if(isWater(x,z)||hitsSolid(x,z,0.5))continue;makeWheat(x,z);}}
+  for(let c=0;c<18;c++){const ctr=randGrass();for(let j=0;j<12;j++){const x=ctr.x+(Math.random()+Math.random()+Math.random()-1.5)*8,z=ctr.z+(Math.random()+Math.random()+Math.random()-1.5)*8;if(isCBD(x,z)||isWater(x,z)||hitsSolid(x,z,0.5))continue;makeWheat(x,z);}}
   for(let i=0;i<40;i++){const s=randGrass();makeGrassTuft(s.x,s.z);}
   for(let i=0;i<40;i++){const s=randGrass();makeFlower(s.x,s.z);}
   for(let i=0;i<20;i++){const s=randGrass();makeTree(s.x,s.z);}
@@ -36,8 +36,8 @@ function makeFlower(x,z){const g=new THREE.Group();const stem=new THREE.Mesh(new
   for(let i=0;i<36;i++){const s=randWet();makeFlower(s.x,s.z);}
   for(let i=0;i<14;i++){const s=randWet();makeTree(s.x,s.z);}
   for(let i=0;i<14;i++){const s=randWet();makeRock(s.x,s.z);}
-  // FARM: neat wheat rows + a few trees/rocks at edges
-  for(let rz=FARM.z0+4;rz<FARM.z1-3;rz+=4){for(let rx=FARM.x0+3;rx<FARM.x1-2;rx+=3){if(hitsSolid(rx,rz,0.8))continue;makeWheat(rx+(Math.random()-.5),rz+(Math.random()-.5));}}
+  // FARM: fenced wheat plot inside the NE quadrant (keeps mesh count sane)
+  for(let rz=-88;rz<-52;rz+=4){for(let rx=48;rx<94;rx+=3){if(isCBD(rx,rz)||isWater(rx,rz)||hitsSolid(rx,rz,0.8))continue;makeWheat(rx+(Math.random()-.5),rz+(Math.random()-.5));}}
   for(let i=0;i<10;i++){const s=randFarm();makeFlower(s.x,s.z);}
   // RUINS: construction waste = rocks + sparse weeds/flowers + dead trees
   for(let i=0;i<50;i++){const s=randRuin();makeRock(s.x,s.z);}

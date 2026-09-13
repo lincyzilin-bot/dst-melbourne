@@ -113,6 +113,12 @@ function paintGround(){
   fillRectW(-2,34,2,66,'#8a6f4d');ditherW(-2,34,2,66,['#6b543a','#9a7f58'],160,0.3);
   fillRectW(-66,-2,-32,2,'#8a6f4d');ditherW(-66,-2,-32,2,['#6b543a','#9a7f58'],160,0.3);
   fillRectW(32,-2,66,2,'#8a6f4d');ditherW(32,-2,66,2,['#6b543a','#9a7f58'],160,0.3);
+  // CBD moat: wide blocking ring with mud banks (fords stay walkable dirt)
+  fillRectW(MOAT.x0-1,MOAT.z0-1,MOAT.x1+1,MOAT.z1+1,'#5d4a30');
+  fillRectW(MOAT.x0,MOAT.z0,MOAT.x1,MOAT.z1,'#17494a');
+  fillRectW(MOAT.x0+0.8,MOAT.z0+0.8,MOAT.x1-0.8,MOAT.z1-0.8,'#1f7f7a');
+  fillRectW(CBD.x0-0.5,CBD.z0-0.5,CBD.x1+0.5,CBD.z1+0.5,'#8a7150');
+  for(const f of FORDS){fillRectW(f.x0,f.z0,f.x1,f.z1,'#8a6f4d');ditherW(f.x0,f.z0,f.x1,f.z1,['#6b543a','#9a7f58'],40,0.3);}
   // wiggly rivers in the gaps (photo ref): mud bank + two-tone water, walkable fords
   function riverW(pts,w){
     g.lineCap='round';g.lineJoin='round';
@@ -120,10 +126,10 @@ function paintGround(){
     const S=GS/WORLD;
     stroke('#8a7150',(w+1.6)*S);stroke('#17494a',w*S);stroke('#1f7f7a',(w*0.6)*S);
   }
-  riverW([[2,-100],[-3,-80],[4,-64],[-2,-48],[1,-36]],2.2);   // north: Grass|Farm
-  riverW([[34,2],[50,-3],[66,3],[82,-2],[100,1]],2.2);        // east: Farm|Ruin
-  riverW([[-100,-1],[-80,3],[-60,-3],[-38,1]],2.2);           // west: Grass|Wet
-  riverW([[0,36],[-4,52],[3,68],[-5,84],[2,100]],2.4);        // south: Wet|Ruin
+  riverW([[2,-100],[-3,-80],[4,-64],[-2,-52],[1,-41]],2.0);   // north: Grass|Farm
+  riverW([[39,2],[55,-3],[71,3],[86,-2],[100,1]],2.0);        // east: Farm|Ruin
+  riverW([[-100,-1],[-80,3],[-60,-3],[-39,1]],2.0);           // west: Grass|Wet
+  riverW([[0,41],[-4,56],[3,70],[-5,86],[2,100]],2.0);        // south: Wet|Ruin
   // soft large light variation so zones feel lit like pic2/3
   for(let i=0;i<8;i++){const gr=g.createRadialGradient(R(0,GS),R(0,GS),10,R(0,GS),R(0,GS),R(150,380));gr.addColorStop(0,'rgba(255,255,240,.05)');gr.addColorStop(1,'rgba(0,0,20,0)');g.fillStyle=gr;g.fillRect(0,0,GS,GS);}
   return c;
@@ -141,3 +147,14 @@ for(const p of PONDS){
   const deep=new THREE.Mesh(new THREE.CircleGeometry(p.r*0.45,20),new THREE.MeshStandardMaterial({color:0x14494a,roughness:0.4,transparent:true,opacity:0.9}));
   deep.rotation.x=-Math.PI/2;deep.position.set(p.x,0.09,p.z);scene.add(deep);
 }
+// CBD moat water skins: 8 strips leaving 4 dirt fords (matches isMoat paint)
+(function(){
+  const moatM=new THREE.MeshStandardMaterial({color:0x1e6f6e,roughness:0.35,metalness:0.05,transparent:true,opacity:0.92});
+  function strip(x0,x1,z0,z1){const w=x1-x0,d=z1-z0;if(w<=0||d<=0)return;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),moatM);m.rotation.x=-Math.PI/2;m.position.set((x0+x1)/2,0.07,(z0+z1)/2);scene.add(m);}
+  strip(MOAT.x0,-2.5,MOAT.z0,CBD.z0);strip(2.5,MOAT.x1,MOAT.z0,CBD.z0);       // north arms
+  strip(MOAT.x0,-2.5,CBD.z1,MOAT.z1);strip(2.5,MOAT.x1,CBD.z1,MOAT.z1);       // south arms
+  strip(MOAT.x0,CBD.x0,CBD.z0,-2.5);strip(MOAT.x0,CBD.x0,2.5,CBD.z1);         // west arms
+  strip(CBD.x1,MOAT.x1,CBD.z0,-2.5);strip(CBD.x1,MOAT.x1,2.5,CBD.z1);         // east arms
+  const fordM=new THREE.MeshStandardMaterial({color:0x8a6f4d,roughness:1});
+  for(const f of FORDS){const m=new THREE.Mesh(new THREE.PlaneGeometry(f.x1-f.x0,f.z1-f.z0),fordM);m.rotation.x=-Math.PI/2;m.position.set((f.x0+f.x1)/2,0.08,(f.z0+f.z1)/2);m.receiveShadow=true;scene.add(m);}
+})();

@@ -1,15 +1,21 @@
 import * as THREE from 'three';
-/* ================= 0. QUADRANT LAYOUT (photo ref) =================
+/* ================= 0. QUADRANT LAYOUT (photo ref) v1.2 =================
    x+ = east, z+ = south. WORLD 200 (-100..100), scale unchanged.
-   CBD: centre | GRASSLAND: north-west | FARM: north-east
-   WETLAND: south-west | RUIN: south-east. Rivers run in the 4-unit gaps. */
+   CBD: centre | outer ring fills the whole map edge-to-edge, no gaps:
+   GRASSLAND NW (x<0,z<0) | FARM NE (x>0,z<0) | WETLAND SW (x<0,z>0) | RUIN SE.
+   A wide moat rings the CBD (boat water); 4 dirt fords keep it playable
+   until the boat arrives. Small inter-zone rivers are visual-only for now. */
 const WORLD=200, HALF=WORLD/2, N=72, CELL=WORLD/N;
 const SAVE_KEY='dst_melbourne_zoned_v1', DAY_LEN=240, REVEAL_R=13;
 const CBD={x0:-34,x1:34,z0:-36,z1:36};
-const GRASS={x0:-92,x1:-38,z0:-92,z1:-40};
-const FARM={x0:38,x1:92,z0:-92,z1:-40};
-const WET={x0:-92,x1:-38,z0:40,z1:92};
-const RUIN={x0:38,x1:92,z0:40,z1:92};
+const GRASS={x0:-100,x1:0,z0:-100,z1:0};
+const FARM={x0:0,x1:100,z0:-100,z1:0};
+const WET={x0:-100,x1:0,z0:0,z1:100};
+const RUIN={x0:0,x1:100,z0:0,z1:100};
+// CBD moat: water ring between CBD edge and this expanded box (wide river)
+const MOAT={x0:-39,x1:39,z0:-41,z1:41};
+// dirt fords across the moat (temporary until bridge/boat lands)
+const FORDS=[{x0:-2.5,x1:2.5,z0:-41,z1:-36},{x0:-2.5,x1:2.5,z0:36,z1:41},{x0:-39,x1:-34,z0:-2.5,z1:2.5},{x0:34,x1:39,z0:-2.5,z1:2.5}];
 const ROADS_V=[-20,-4,12,26], ROADS_H=[-24,-8,8,24], ROAD_W=5;
 const PARKS=[{x:-18,z:-18,r:8,n:'PARK'},{x:16,z:16,r:8,n:'FLAGSTAFF'}];
 const FLAGSTAFF={x:16,z:16,r:8};
@@ -30,11 +36,17 @@ function inPark(x,z){return PARKS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
 function inFarm(x,z){return inRect(x,z,FARM);}
 function inRuin(x,z){return inRect(x,z,RUIN);}
 function isPond(x,z){return PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
-function isWater(x,z){return isPond(x,z);}
+function inFord(x,z){return FORDS.some(f=>x>f.x0&&x<f.x1&&z>f.z0&&z<f.z1);}
+function isMoat(x,z){
+  const inOuter=x>MOAT.x0&&x<MOAT.x1&&z>MOAT.z0&&z<MOAT.z1;
+  const inInner=isCBD(x,z);
+  return inOuter&&!inInner&&!inFord(x,z);
+}
+function isWater(x,z){return isPond(x,z)||isMoat(x,z);}
 function wetlandLocked(){return P.day<=3;} // 💧 unlocks Day 4
 function farmLocked(){return P.day<=4;}     // 🚜 unlocks Day 5 (survived 4 days)
 function ruinLocked(){return P.day<=6;}     // 🏚️ unlocks Day 7 (survived 6 days)
-function zoneOf(x,z){if(isWet(x,z))return'wetland';if(isGrass(x,z))return'grassland';if(isCBD(x,z))return'cbd';if(inFarm(x,z))return'farm';if(inRuin(x,z))return'ruin';return'wilds';}
+function zoneOf(x,z){if(isCBD(x,z))return'cbd';if(isWet(x,z))return'wetland';if(isGrass(x,z))return'grassland';if(inFarm(x,z))return'farm';if(inRuin(x,z))return'ruin';return'wilds';}
 const ZONE_ICON={cbd:'🏙️ CBD',grassland:'🌾 Grassland',wetland:'💧 Wetland',farm:'🚜 Farm',ruin:'🏚️ Ruins',wilds:'🧭 Wilds'};
 /* ================= 1. EXPLORE SAVE ================= */
 function freshSave(){return{lifetime:'0'.repeat(N*N),runs:[],best:0,totalRuns:0,player:null};}

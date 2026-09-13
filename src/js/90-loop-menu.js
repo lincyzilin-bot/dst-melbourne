@@ -101,7 +101,7 @@ function startRun(fresh){
   runAdded=0;persist(false);
   document.getElementById('start-overlay').classList.add('hidden');document.getElementById('dead-overlay').classList.add('hidden');
   document.getElementById('hud').classList.add('on');playing=true;P.dead=false;renderInv();drawMinimap();updateExploreUI();
-  toast(fresh?'🧭 New run! CBD → NW grassland. Wet D4 · Farm D5 · Ruins D7.':'🧭 Welcome back. Map saved.');
+  toast(fresh?'🧭 New run! Cross the moat at dirt fords. Wet D4 · Farm D5 · Ruins D7.':'🧭 Welcome back. Map saved.');
 }
 document.getElementById('btn-continue').onclick=()=>startRun(false);
 document.getElementById('btn-new').onclick=()=>startRun(true);
