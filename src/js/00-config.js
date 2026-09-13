@@ -1,0 +1,51 @@
+import * as THREE from 'three';
+/* ================= 0. ZONED LAYOUT =================
+   x+ = east, z+ = south. WORLD 200 (-100..100)
+   CBD: centre-east  | GRASSLAND: north-west | WETLAND: south-west */
+const WORLD=200, HALF=WORLD/2, N=72, CELL=WORLD/N;
+const SAVE_KEY='dst_melbourne_zoned_v1', DAY_LEN=240, REVEAL_R=13;
+const CBD={x0:2,x1:72,z0:-38,z1:38};
+const GRASS={x0:-92,x1:-8,z0:-92,z1:-12};
+const WET={x0:-92,x1:-8,z0:12,z1:92};
+const ROADS_V=[12,28,44,60], ROADS_H=[-28,-12,4,20,34], ROAD_W=5;
+const PARKS=[{x:52,z:-20,r:9,n:'PARK'},{x:20,z:22,r:8,n:'FLAGSTAFF'}];
+const FLAGSTAFF={x:20,z:22,r:8};
+const FARM={x0:74,x1:96,z0:-28,z1:28};
+const RUIN_N={x0:-4,x1:70,z0:-88,z1:-42};
+const RUIN_S={x0:2,x1:70,z0:42,z1:92};
+const PONDS=[{x:-62,z:48,r:13},{x:-34,z:66,r:9},{x:-68,z:74,r:7}];
+const STONE_CIRCLE={x:-50,z:-55,R:7};
+const SPAWN={x:28,z:28};
+function inRect(x,z,r){return x>r.x0&&x<r.x1&&z>r.z0&&z<r.z1;}
+function isCBD(x,z){return inRect(x,z,CBD);}
+function isGrass(x,z){return inRect(x,z,GRASS);}
+function isWet(x,z){return inRect(x,z,WET);}
+function isRoad(x,z){
+  if(!isCBD(x,z))return false;
+  for(const rx of ROADS_V)if(Math.abs(x-rx)<ROAD_W/2)return true;
+  for(const rz of ROADS_H)if(Math.abs(z-rz)<ROAD_W/2)return true;
+  return false;
+}
+function inPark(x,z){return PARKS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
+function inFarm(x,z){return inRect(x,z,FARM);}
+function inRuin(x,z){return inRect(x,z,RUIN_N)||inRect(x,z,RUIN_S);}
+function isPond(x,z){return PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
+function isWater(x,z){return isPond(x,z);}
+function wetlandLocked(){return P.day<=3;}
+function zoneOf(x,z){if(isWet(x,z))return'wetland';if(isGrass(x,z))return'grassland';if(isCBD(x,z))return'cbd';if(inFarm(x,z))return'farm';if(inRuin(x,z))return'ruin';return'wilds';}
+const ZONE_ICON={cbd:'🏙️ CBD',grassland:'🌾 Grassland',wetland:'💧 Wetland',farm:'🚜 Farm',ruin:'🏚️ Ruins',wilds:'🧭 Wilds'};
+/* ================= 1. EXPLORE SAVE ================= */
+function freshSave(){return{lifetime:'0'.repeat(N*N),runs:[],best:0,totalRuns:0,player:null};}
+function loadSave(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return freshSave();const s=Object.assign(freshSave(),JSON.parse(raw));if(!s.lifetime||s.lifetime.length!==N*N)return freshSave();return s;}catch(e){return freshSave();}}
+let save=loadSave();
+function persist(flash=true){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}if(flash){const t=document.getElementById('saved-tag');t.style.opacity=1;clearTimeout(persist._t);persist._t=setTimeout(()=>t.style.opacity=0,1200);}}
+const solids=[];
+function hitsSolid(x,z,rad=0.55){for(const s of solids){const cx=Math.max(s.x0,Math.min(x,s.x1)),cz=Math.max(s.z0,Math.min(z,s.z1));if(Math.hypot(x-cx,z-cz)<rad)return true;}return false;}
+const LAND=new Uint8Array(N*N);let landTotal=0;
+function computeLand(){landTotal=0;for(let gz=0;gz<N;gz++)for(let gx=0;gx<N;gx++){const x=-HALF+(gx+0.5)*CELL,z=-HALF+(gz+0.5)*CELL;const ok=!isWater(x,z)&&!hitsSolid(x,z,0);LAND[gz*N+gx]=ok?1:0;if(ok)landTotal++;}}
+let lifeBits=save.lifetime.split('').map(Number);
+function lifetimeCount(){let c=0;for(let i=0;i<lifeBits.length;i++)c+=lifeBits[i]*LAND[i];return c;}
+function lifetimePct(){return landTotal?lifetimeCount()/landTotal*100:0;}
+let runAdded=0, fogDirty=false;
+function commitLifetime(){save.lifetime=lifeBits.join('');}
+function reveal(x,z){const cx=Math.floor((x+HALF)/CELL),cz=Math.floor((z+HALF)/CELL),r=Math.ceil(REVEAL_R/CELL);let ch=false;for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const gx=cx+dx,gz=cz+dz;if(gx<0||gz<0||gx>=N||gz>=N)continue;const wx=-HALF+(gx+0.5)*CELL,wz=-HALF+(gz+0.5)*CELL;if(Math.hypot(wx-x,wz-z)>REVEAL_R)continue;const i=gz*N+gx;if(!lifeBits[i]){lifeBits[i]=1;runAdded++;ch=true;}}if(ch)fogDirty=true;}

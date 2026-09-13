@@ -1,0 +1,40 @@
+<div id="game"></div><div id="vignette"></div>
+<div id="hud">
+  <div id="topbar"><span id="phase-icon">☀️</span><b id="day-label">Day 1</b><div id="clockbar"><div id="clockfill"></div></div><span id="zone-label" style="font-size:12px;opacity:.9">🏙️ CBD</span></div>
+  <div id="stats">
+    <div class="stat"><div class="row"><span>❤️ HEALTH</span><span id="hp-num">100</span></div><div class="bar"><div id="hp-fill"></div></div></div>
+    <div class="stat"><div class="row"><span>🍖 HUNGER</span><span id="hunger-num">100</span></div><div class="bar"><div id="hunger-fill"></div></div></div>
+    <div class="stat"><div class="row"><span>🧠 SANITY</span><span id="sanity-num">100</span></div><div class="bar"><div id="sanity-fill"></div></div></div>
+  </div>
+  <div id="explore-panel">
+    <h3>🗺️ EXPLORED (SAVED)</h3><div id="explore-pct">0.0%</div>
+    <canvas id="minimap" width="180" height="180"></canvas>
+    <div class="sub" id="explore-sub">lifetime · 0 cells</div>
+    <div class="sub" id="run-sub">this run · +0</div>
+    <div id="lock-tag">🔒 WETLAND unlocks Day 4</div>
+    <button class="btn ghost" id="history-btn" style="width:100%;margin-top:6px;padding:6px;font-size:12px">📜 Run history</button>
+  </div>
+  <div id="craftbar"></div><div id="invbar"></div>
+  <div id="actions">
+    <button class="abtn" id="btn-act">⛏️<br>ACT (E)</button>
+    <button class="abtn" id="btn-atk">🗡️<br>HIT (Sp)</button>
+    <button class="abtn" id="btn-eat">🍖<br>EAT (Q)</button>
+    <button class="abtn" id="btn-fire">🔥<br>FIRE (C)</button>
+  </div>
+  <div id="prompt"></div><div id="toast"></div><div id="saved-tag">✓ exploration saved</div>
+</div>
+<div id="start-overlay" class="overlay">
+  <div class="card">
+    <h1>🌙 DON'T STARVE: <span>MELBOURNE</span></h1>
+    <p>Three.js survival clone — <b>scaled Melbourne CBD</b> (concrete roads, parks &amp; soil), <b>NW grassland</b> (rabbits + wheat), <b>SW wetland</b> (ponds, reeds — <b>locked until Day 4</b>), <b>east farm</b> (fenced wheat rows) and <b>north/south ruins</b> (broken buildings + waste).</p>
+    <div class="zone-legend"><span style="background:#3c3f45;color:#ffe9b0">🏙️ CBD</span><span style="background:#6d7a35;color:#fff">🌾 GRASSLAND</span><span style="background:#1f6f6b;color:#fff">💧 WETLAND 🔒D4</span><span style="background:#6e5136;color:#fff">🚜 FARM</span><span style="background:#8d9299;color:#fff">🏚️ RUINS</span></div>
+    <div class="bigpct" id="start-pct">0.0%</div>
+    <p>of the map explored — <b>saved across every play</b> (localStorage)</p>
+    <div class="runs" id="runs-list"></div>
+    <div class="keys"><kbd>WASD</kbd>/<kbd>arrows</kbd> walk · <kbd>E</kbd> chop/mine/pick/gift · <kbd>Space</kbd> attack · <kbd>Q</kbd> eat · <kbd>C</kbd> campfire · click = walk there<br>🌾 Wheat needs <b>⛏️ pickaxe</b>. 🐇 Day rabbits → morsel. 🦡 Park possums: <b>E</b> with food/flowers = friend, <b>Space</b> = enemy + meat. 🧠 Watch sanity at night.</div>
+    <div class="rowbtns"><button class="btn" id="btn-continue">▶ CONTINUE</button><button class="btn ghost" id="btn-new">🧭 NEW RUN</button></div>
+    <div class="rowbtns"><button class="btn warn" id="btn-wipe" style="font-size:12px;padding:7px 14px">🗑 wipe exploration save</button></div>
+  </div>
+</div>
+<div id="history-overlay" class="overlay hidden"><div class="card"><h1>📜 RUN <span>HISTORY</span></h1><p>Each row = one session. % is cumulative lifetime coverage.</p><div class="runs" id="history-list" style="max-height:300px"></div><div class="rowbtns"><button class="btn" id="btn-close-history">CLOSE</button></div></div></div>
+<div id="dead-overlay" class="overlay hidden"><div class="card"><h1>💀 YOU <span>STARVED</span></h1><p id="dead-cause"></p><div class="runs" id="dead-stats"></div><div class="rowbtns"><button class="btn" id="btn-respawn">🏕 RESPAWN IN CBD</button></div></div></div>
