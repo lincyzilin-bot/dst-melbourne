@@ -52,16 +52,19 @@ function doFire(){if(!playing||P.dead)return;if(!(inv.firekit>0)){toast('Craft a
 function doBridge(){
   if(!playing||P.dead)return;
   if(!(inv.bridgekit>0)){toast('Craft a 🌉 Bridge kit first (4 log + 2 stone)');return;}
-  let nearRiver=false;
-  for(let a=0;a<8;a++){const tx=P.x+Math.cos(a/8*Math.PI*2)*3.5,tz=P.z+Math.sin(a/8*Math.PI*2)*3.5;if(isRiver(tx,tz)){nearRiver=true;break;}}
-  if(!nearRiver&&!isRiver(P.x,P.z)){
-    if(isMoat(P.x,P.z)){toast('🌊 Too wide! Bridges are for small rivers — use the dirt fords.');return;}
-    toast('Stand next to a small river to lay a bridge (B)');
+  let nearRiver=false,nearMoat=false,nearPond=false;
+  for(let a=0;a<8;a++){const tx=P.x+Math.cos(a/8*Math.PI*2)*3.5,tz=P.z+Math.sin(a/8*Math.PI*2)*3.5;if(isRiver(tx,tz))nearRiver=true;if(isMoat(tx,tz))nearMoat=true;if(isPond(tx,tz))nearPond=true;}
+  if(!nearRiver&&!nearMoat){
+    if(nearPond){toast('Bridges are for rivers and the moat — just walk around the pond!');return;}
+    toast('Stand next to water to lay a bridge (B)');
     return;
   }
   inv.bridgekit--;
-  const nsRiver=Math.abs(P.x)<25; // N/S rivers run north-south → deck wide in X
-  const b=addBridge(P.x,P.z,nsRiver);
-  if(b){buildBridgeMesh(b);toast('🌉 Bridge laid! Small rivers are now walkable here.');}
+  // span across the water: sample which way it runs, deck goes perpendicular
+  const waterNS=isWater(P.x,P.z-4)||isWater(P.x,P.z+4);
+  const waterEW=isWater(P.x-4,P.z)||isWater(P.x+4,P.z);
+  const horiz=waterEW&&!waterNS?false:true;
+  const b=addBridge(P.x,P.z,horiz);
+  if(b){buildBridgeMesh(b);toast('🌉 Bridge laid!');}
   renderInv();
 }

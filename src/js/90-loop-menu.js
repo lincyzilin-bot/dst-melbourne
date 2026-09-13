@@ -16,7 +16,7 @@ function movePlayer(dt){
     if(gateMsg((x,z)=>isWet(x,z)&&wetlandLocked(),'🔒 Wetland locked — survive past Day 3 (reach Day 4)!'))blockedX=true;
     else if(gateMsg((x,z)=>inFarm(x,z)&&farmLocked(),'🔒 Farm locked — survive 4 days (reach Day 5)!'))blockedX=true;
     else if(gateMsg((x,z)=>inRuin(x,z)&&ruinLocked(),'🔒 Ruins locked — survive 6 days (reach Day 7)!'))blockedX=true;
-    else if(gateMsg((x,z)=>isMoat(x,z),'🌊 Wide moat — cross at the dirt fords!'))blockedX=true;
+    else if(gateMsg((x,z)=>isMoat(x,z),'🌊 Wide moat — lay a 🌉 bridge (B) at the water\'s edge!'))blockedX=true;
     else if(gateMsg((x,z)=>isRiver(x,z)&&!onBridge(x,z),'🌊 Small river — cross at a 🌉 bridge (B)!'))blockedX=true;
     else if(walkable(nx,P.z))P.x=nx;
     if((isWet(P.x,nz)&&wetlandLocked())||(inFarm(P.x,nz)&&farmLocked())||(inRuin(P.x,nz)&&ruinLocked())){/* blocked on z too */}
@@ -103,7 +103,7 @@ function startRun(fresh){
   runAdded=0;persist(false);
   document.getElementById('start-overlay').classList.add('hidden');document.getElementById('dead-overlay').classList.add('hidden');
   document.getElementById('hud').classList.add('on');playing=true;P.dead=false;renderInv();drawMinimap();updateExploreUI();
-  toast(fresh?'🧭 New run! Moat at dirt fords, rivers need 🌉 bridges (B). Wet D4 · Farm D5 · Ruins D7.':'🧭 Welcome back. Map saved.');
+  toast(fresh?'🧭 New run! Every crossing needs your own 🌉 bridge (B). Wet D4 · Farm D5 · Ruins D7.':'🧭 Welcome back. Map saved.');
 }
 document.getElementById('btn-continue').onclick=()=>startRun(false);
 document.getElementById('btn-new').onclick=()=>startRun(true);

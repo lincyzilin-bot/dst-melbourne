@@ -3,8 +3,8 @@ import * as THREE from 'three';
    x+ = east, z+ = south. WORLD 200 (-100..100), scale unchanged.
    CBD: centre | outer ring fills the whole map edge-to-edge, no gaps:
    GRASSLAND NW (x<0,z<0) | FARM NE (x>0,z<0) | WETLAND SW (x<0,z>0) | RUIN SE.
-   A wide moat rings the CBD (cross at 4 dirt fords); small inter-zone rivers
-   need player-built bridges — no free crossings by design. */
+   A wide moat rings the CBD; every crossing (moat included) is player-built —
+   no free bridges, fords, or boats by design. */
 const WORLD=200, HALF=WORLD/2, N=72, CELL=WORLD/N;
 const SAVE_KEY='dst_melbourne_zoned_v1', DAY_LEN=240, REVEAL_R=13;
 const CBD={x0:-34,x1:34,z0:-36,z1:36};
@@ -14,8 +14,7 @@ const WET={x0:-100,x1:0,z0:0,z1:100};
 const RUIN={x0:0,x1:100,z0:0,z1:100};
 // CBD moat: water ring between CBD edge and this expanded box (wide river)
 const MOAT={x0:-39,x1:39,z0:-41,z1:41};
-// dirt fords across the moat — the only free water crossings in the game
-const FORDS=[{x0:-2.5,x1:2.5,z0:-41,z1:-36},{x0:-2.5,x1:2.5,z0:36,z1:41},{x0:-39,x1:-34,z0:-2.5,z1:2.5},{x0:34,x1:39,z0:-2.5,z1:2.5}];
+// dirt fords REMOVED by design (v1.5.1) — every crossing is player-built.
 // small rivers between outer quadrants (BLOCKING — cross only by bridge)
 const RIVERS=[
   {pts:[[2,-100],[-3,-80],[4,-64],[-2,-52],[1,-41]],w:2.0},   // north: Grass|Farm
@@ -72,11 +71,9 @@ function inPark(x,z){return PARKS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
 function inFarm(x,z){return inRect(x,z,FARM)&&!isCBD(x,z)&&!isMoat(x,z);}
 function inRuin(x,z){return inRect(x,z,RUIN)&&!isCBD(x,z)&&!isMoat(x,z);}
 function isPond(x,z){return PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r);}
-function inFord(x,z){return FORDS.some(f=>x>f.x0&&x<f.x1&&z>f.z0&&z<f.z1);}
 function isMoat(x,z){
   const inOuter=x>MOAT.x0&&x<MOAT.x1&&z>MOAT.z0&&z<MOAT.z1;
-  const inInner=isCBD(x,z);
-  return inOuter&&!inInner&&!inFord(x,z);
+  return inOuter&&!isCBD(x,z);
 }
 function isWater(x,z){return isPond(x,z)||isMoat(x,z)||(isRiver(x,z)&&!onBridge(x,z));}
 function wetlandLocked(){return P.day<=3;} // 💧 unlocks Day 4

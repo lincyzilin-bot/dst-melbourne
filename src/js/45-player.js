@@ -25,8 +25,8 @@ function walkable(x,z){
   if(isWet(x,z)&&wetlandLocked())return false; // 🔒 locked until Day 4
   if(inFarm(x,z)&&farmLocked())return false;   // 🔒 locked until Day 5
   if(inRuin(x,z)&&ruinLocked())return false;   // 🔒 locked until Day 7
-  if(isRiver(x,z)&&!onBridge(x,z))return false; // small rivers need player-built bridges
-  if(isWater(x,z))return false; // moat (fords exempt inside isMoat) + ponds block
+  if(isRiver(x,z)&&!onBridge(x,z))return false; // rivers need player-built bridges
+  if(isWater(x,z))return false; // moat + ponds block (bridges exempt rivers above)
   return true;
 }
 if(!walkable(P.x,P.z)){P.x=SPAWN.x;P.z=SPAWN.z;}

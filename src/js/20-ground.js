@@ -113,7 +113,7 @@ function paintGround(){
   fillRectW(-2,34,2,66,'#8a6f4d');ditherW(-2,34,2,66,['#6b543a','#9a7f58'],160,0.3);
   fillRectW(-66,-2,-32,2,'#8a6f4d');ditherW(-66,-2,-32,2,['#6b543a','#9a7f58'],160,0.3);
   fillRectW(32,-2,66,2,'#8a6f4d');ditherW(32,-2,66,2,['#6b543a','#9a7f58'],160,0.3);
-  // CBD moat: wide blocking ring with mud banks (fords stay walkable dirt).
+  // CBD moat: wide blocking ring with mud banks (player bridges span it)
   // NOTE: paint as 4 ring strips only — never over the CBD slab interior.
   function ringW(x0,x1,z0,z1,color){
     fillRectW(x0,z0,x1,CBD.z0,color);fillRectW(x0,CBD.z1,x1,z1,color);
@@ -122,7 +122,6 @@ function paintGround(){
   ringW(MOAT.x0-1,MOAT.x1+1,MOAT.z0-1,MOAT.z1+1,'#5d4a30');
   ringW(MOAT.x0,MOAT.x1,MOAT.z0,MOAT.z1,'#17494a');
   ringW(MOAT.x0+0.8,MOAT.x1-0.8,MOAT.z0+0.8,MOAT.z1-0.8,'#1f7f7a');
-  for(const f of FORDS){fillRectW(f.x0,f.z0,f.x1,f.z1,'#8a6f4d');ditherW(f.x0,f.z0,f.x1,f.z1,['#6b543a','#9a7f58'],40,0.3);}
   // small quadrant rivers (BLOCKING — cross only by bridge); painted from RIVERS
   function riverW(pts,w){
     g.lineCap='round';g.lineJoin='round';
@@ -153,16 +152,12 @@ for(const p of PONDS){
   const deep=new THREE.Mesh(new THREE.CircleGeometry(p.r*0.45,20),new THREE.MeshStandardMaterial({color:0x14494a,roughness:0.4,transparent:true,opacity:0.9}));
   deep.rotation.x=-Math.PI/2;deep.position.set(p.x,0.09,p.z);scene.add(deep);
 }
-// CBD moat water skins: 8 strips leaving 4 dirt fords (matches isMoat paint)
+// CBD moat water skins: full ring strips (player bridge kits span it)
 (function(){
   const moatM=new THREE.MeshStandardMaterial({color:0x1e6f6e,roughness:0.35,metalness:0.05,transparent:true,opacity:0.92});
   function strip(x0,x1,z0,z1){const w=x1-x0,d=z1-z0;if(w<=0||d<=0)return;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),moatM);m.rotation.x=-Math.PI/2;m.position.set((x0+x1)/2,0.07,(z0+z1)/2);scene.add(m);}
-  strip(MOAT.x0,-2.5,MOAT.z0,CBD.z0);strip(2.5,MOAT.x1,MOAT.z0,CBD.z0);       // north arms
-  strip(MOAT.x0,-2.5,CBD.z1,MOAT.z1);strip(2.5,MOAT.x1,CBD.z1,MOAT.z1);       // south arms
-  strip(MOAT.x0,CBD.x0,CBD.z0,-2.5);strip(MOAT.x0,CBD.x0,2.5,CBD.z1);         // west arms
-  strip(CBD.x1,MOAT.x1,CBD.z0,-2.5);strip(CBD.x1,MOAT.x1,2.5,CBD.z1);         // east arms
-  const fordM=new THREE.MeshStandardMaterial({color:0x8a6f4d,roughness:1});
-  for(const f of FORDS){const m=new THREE.Mesh(new THREE.PlaneGeometry(f.x1-f.x0,f.z1-f.z0),fordM);m.rotation.x=-Math.PI/2;m.position.set((f.x0+f.x1)/2,0.08,(f.z0+f.z1)/2);m.receiveShadow=true;scene.add(m);}
+  strip(MOAT.x0,MOAT.x1,MOAT.z0,CBD.z0);strip(MOAT.x0,MOAT.x1,CBD.z1,MOAT.z1); // north + south arms
+  strip(MOAT.x0,CBD.x0,CBD.z0,CBD.z1);strip(CBD.x1,MOAT.x1,CBD.z0,CBD.z1);     // west + east arms
 })();
 // bridges: plank + rails; reused for player-built kits at runtime
 const bridgeWoodM=new THREE.MeshStandardMaterial({color:0x7a5230,roughness:.9});

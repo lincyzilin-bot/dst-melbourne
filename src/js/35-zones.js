@@ -5,8 +5,6 @@ const farmWall=new THREE.Mesh(new THREE.BoxGeometry(50,4,1.2),new THREE.MeshBasi
 farmWall.position.set(50,2,-45);scene.add(farmWall);
 const ruinWall=new THREE.Mesh(new THREE.BoxGeometry(50,4,1.2),new THREE.MeshBasicMaterial({color:0xff8a5b,transparent:true,opacity:0.28}));
 ruinWall.position.set(50,2,45);scene.add(ruinWall);
-function makePost(x,z){const g=new THREE.Group();const post=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,2.2,7),new THREE.MeshStandardMaterial({color:0x6b4423}));post.position.y=1.1;post.castShadow=true;g.add(post);const board=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.6,0.12),new THREE.MeshStandardMaterial({color:0x8a6a3f}));board.position.y=1.9;board.castShadow=true;g.add(board);g.position.set(x,0,z);scene.add(g);}
-makePost(-38,0);makePost(38,0);makePost(0,-38);makePost(0,38);
 // FARM 3D: fenced wheat plot inside NE quadrant + scarecrow + shed
 (function(){
   const fenceM=new THREE.MeshStandardMaterial({color:0x7a5230});

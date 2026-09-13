@@ -1,3 +1,6 @@
+## v1.5.1 - 20260913-2208
+- ford platforms and signposts removed, moat fully blocks, bridge kits now span moat too
+
 ## v1.5.0 - 20260913-2159
 - no free bridges: pre-placed crossings removed, every river needs own build; rowboat removed, moat crosses at dirt fords
 
