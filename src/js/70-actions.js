@@ -49,22 +49,32 @@ function doAttack(){
 }
 function doEat(){if(!playing||P.dead)return;const it=ITEMS[sel];if(!it||!it.food||!(inv[sel]>0)){toast('Select berries / wheat / morsel / meat / petals first');return;}inv[sel]--;P.hunger=Math.min(100,P.hunger+it.food);if(sel==='flower')P.sanity=Math.min(100,P.sanity+4);if(sel==='garland'){P.sanity=Math.min(100,P.sanity+20);}toast(`😋 +${it.food} hunger`);renderInv();}
 function doFire(){if(!playing||P.dead)return;if(!(inv.firekit>0)){toast('Craft a 🔥 Fire kit first (3 log + 1 stone)');return;}inv.firekit--;const fx=P.x+Math.sin(P.face)*1.5,fz=P.z+Math.cos(P.face)*1.5;placeFire(walkable(fx,fz)?fx:P.x,walkable(fx,fz)?fz:P.z);toast('🔥 Campfire lit!');renderInv();}
+function segClosest(px,pz,ax,az,bx,bz){
+  const dx=bx-ax,dz=bz-az,L2=dx*dx+dz*dz;
+  let t=L2?((px-ax)*dx+(pz-az)*dz)/L2:0;t=Math.max(0,Math.min(1,t));
+  return {x:ax+dx*t,z:az+dz*t,d:Math.hypot(px-(ax+dx*t),pz-(az+dz*t)),dx,dz};
+}
 function doBridge(){
   if(!playing||P.dead)return;
   if(!(inv.bridgekit>0)){toast('Craft a 🌉 Bridge kit first (4 log + 2 stone)');return;}
-  let nearRiver=false,nearMoat=false,nearPond=false;
-  for(let a=0;a<8;a++){const tx=P.x+Math.cos(a/8*Math.PI*2)*3.5,tz=P.z+Math.sin(a/8*Math.PI*2)*3.5;if(isRiver(tx,tz))nearRiver=true;if(isMoat(tx,tz))nearMoat=true;if(isPond(tx,tz))nearPond=true;}
-  if(!nearRiver&&!nearMoat){
-    if(nearPond){toast('Bridges are for rivers and the moat — just walk around the pond!');return;}
+  // nearest water segment (rivers + straight moat arms) — deck goes perpendicular to it
+  let best=null;
+  function consider(ax,az,bx,bz){const c=segClosest(P.x,P.z,ax,az,bx,bz);if(!best||c.d<best.d)best=c;}
+  for(const r of RIVERS)for(let i=0;i<r.pts.length-1;i++)consider(r.pts[i][0],r.pts[i][1],r.pts[i+1][0],r.pts[i+1][1]);
+  const mzN=(MOAT.z0+CBD.z0)/2,mzS=(MOAT.z1+CBD.z1)/2,mxW=(MOAT.x0+CBD.x0)/2,mxE=(MOAT.x1+CBD.x1)/2;
+  consider(MOAT.x0,mzN,MOAT.x1,mzN);consider(MOAT.x0,mzS,MOAT.x1,mzS);
+  consider(mxW,CBD.z0,mxW,CBD.z1);consider(mxE,CBD.z0,mxE,CBD.z1);
+  if(!best||best.d>5.5){
+    let pond=false;
+    for(let a=0;a<8;a++)if(isPond(P.x+Math.cos(a/8*Math.PI*2)*3.5,P.z+Math.sin(a/8*Math.PI*2)*3.5)){pond=true;break;}
+    if(pond){toast('Bridges are for rivers and the moat — just walk around the pond!');return;}
     toast('Stand next to water to lay a bridge (B)');
     return;
   }
   inv.bridgekit--;
-  // span across the water: sample which way it runs, deck goes perpendicular
-  const waterNS=isWater(P.x,P.z-4)||isWater(P.x,P.z+4);
-  const waterEW=isWater(P.x-4,P.z)||isWater(P.x+4,P.z);
-  const horiz=waterEW&&!waterNS?false:true;
-  const b=addBridge(P.x,P.z,horiz);
-  if(b){buildBridgeMesh(b);toast('🌉 Bridge laid!');}
+  const L=Math.hypot(best.dx,best.dz)||1,nx=best.dx/L,nz=best.dz/L;
+  const horiz=Math.abs(-nz)>=Math.abs(nx); // long axis (8) perpendicular to the water
+  const b=addBridge(best.x,best.z,horiz);
+  if(b){buildBridgeMesh(b);toast('🌉 Bridge laid straight across!');}
   renderInv();
 }

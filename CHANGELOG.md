@@ -1,3 +1,6 @@
+## v1.5.2 - 20260913-2230
+- bridges auto-orient perpendicular via nearest water segment
+
 ## v1.5.1 - 20260913-2208
 - ford platforms and signposts removed, moat fully blocks, bridge kits now span moat too
 
