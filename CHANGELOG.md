@@ -1,3 +1,6 @@
+## v1.6.1 - 20260914-1251
+- embedded how-to-play YouTube video in guide overlay
+
 ## v1.6.0 - 20260913-2359
 - how-to-play guide overlay from start screen: stats, crafting, spiders, bridges
 
